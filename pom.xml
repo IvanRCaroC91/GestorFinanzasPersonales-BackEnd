@@ -60,13 +60,13 @@
     <modules>
         <module>ms-service-registry</module>
         <module>ms-auth-service</module>
+        <module>ms-api-gateway</module>
 
         <!-- futuros -->
         <!--
         <module>ms-user-service</module>
         <module>ms-finance-service</module>
         <module>ms-budget-service</module>
-        <module>ms-api-gateway</module>
         -->
     </modules>
 
