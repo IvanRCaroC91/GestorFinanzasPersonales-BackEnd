@@ -1,0 +1,6 @@
+com\finanzas\auth\config\CorsConfig.class
+com\finanzas\auth\service\AuthService.class
+com\finanzas\auth\controller\AuthController.class
+com\finanzas\auth\dto\LoginResponse.class
+com\finanzas\auth\AuthServiceApplication.class
+com\finanzas\auth\dto\LoginRequest.class
