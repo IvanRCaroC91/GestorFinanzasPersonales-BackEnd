@@ -11,6 +11,10 @@ spring:
           uri: lb://ms-auth-service
           predicates:
             - Path=/api/v1/auth/**
+        - id: protected-routes
+          uri: lb://ms-auth-service
+          predicates:
+            - Path=/api/v1/protected/**
 
 eureka:
   client:
@@ -25,3 +29,7 @@ logging:
   level:
     org.springframework.cloud.gateway: INFO
     com.finanzas.apigateway: DEBUG
+
+# Configuración JWT (debe coincidir con ms-auth-service)
+jwt:
+  secret: ${JWT_SECRET:mySecretKey123456789012345678901234567890}
