@@ -19,3 +19,8 @@ logging:
   level:
     com.finanzas.auth: DEBUG
     org.springframework.cloud.netflix.eureka: DEBUG
+
+# Configuración JWT
+jwt:
+  secret: ${JWT_SECRET:mySecretKey123456789012345678901234567890}
+  expiration: ${JWT_EXPIRATION:86400000} # 24 horas en milisegundos
