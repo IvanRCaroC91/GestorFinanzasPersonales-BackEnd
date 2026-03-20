@@ -4,6 +4,30 @@ server:
 spring:
   application:
     name: ms-auth-service
+  
+  # Configuración de Base de Datos PostgreSQL
+  datasource:
+    url: jdbc:postgresql://localhost:5432/finanzas_db
+    username: admin
+    password: admin123
+    driver-class-name: org.postgresql.Driver
+  
+  # Configuración JPA
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    open-in-view: false
+  
+  # Habilitar auditoría JPA
+  data:
+    jpa:
+      repositories:
+        enabled: true
 
 eureka:
   client:
@@ -19,6 +43,8 @@ logging:
   level:
     com.finanzas.auth: DEBUG
     org.springframework.cloud.netflix.eureka: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 # Configuración JWT
 jwt:
