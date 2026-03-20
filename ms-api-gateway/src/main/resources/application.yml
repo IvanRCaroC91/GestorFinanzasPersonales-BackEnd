@@ -1,0 +1,29 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: ms-api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: lb://ms-auth-service
+          predicates:
+            - Path=/api/v1/auth/**
+          filters:
+            - StripPrefix=2
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: INFO
+    com.finanzas.apigateway: DEBUG
