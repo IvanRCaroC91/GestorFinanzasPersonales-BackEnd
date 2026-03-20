@@ -20,10 +20,19 @@ CREATE TYPE tipo_inversion AS ENUM ('CDT', 'AHORRO', 'FONDO', 'OTRO');
 -- USUARIOS
 -- =========================
 CREATE TABLE usuarios (
-id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-username TEXT UNIQUE NOT NULL,
-password TEXT NOT NULL,
-created_at TIMESTAMP DEFAULT NOW()
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    username TEXT UNIQUE NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    primer_nombre TEXT NOT NULL,
+    primer_apellido TEXT NOT NULL,
+    segundo_nombre TEXT,
+    segundo_apellido TEXT,
+    celular TEXT UNIQUE NOT NULL,
+    email_verificado BOOLEAN DEFAULT FALSE,
+    celular_verificado BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT NOW(),
+    updated_at TIMESTAMP DEFAULT NOW()
 );
 
 -- =========================
