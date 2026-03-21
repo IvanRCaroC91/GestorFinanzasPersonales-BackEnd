@@ -1,6 +1,11 @@
-com\finanzas\auth\config\CorsConfig.class
+com\finanzas\auth\util\JwtUtil.class
+com\finanzas\auth\config\SecurityConfig.class
 com\finanzas\auth\service\AuthService.class
+com\finanzas\auth\config\DataInitializer.class
 com\finanzas\auth\controller\AuthController.class
+com\finanzas\auth\repository\UserRepository.class
 com\finanzas\auth\dto\LoginResponse.class
+com\finanzas\auth\dto\ApiResponse.class
 com\finanzas\auth\AuthServiceApplication.class
 com\finanzas\auth\dto\LoginRequest.class
+com\finanzas\auth\entity\User.class

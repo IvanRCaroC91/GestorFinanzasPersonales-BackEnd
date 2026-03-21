@@ -6,6 +6,35 @@ spring:
     name: ms-api-gateway
   cloud:
     gateway:
+      # Configuración CORS global para WebFlux
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            # Orígenes permitidos (frontend React) - usar allowedOrigins en lugar de patterns
+            allowedOrigins:
+              - http://localhost:5173
+              - http://127.0.0.1:5173
+            # Métodos HTTP permitidos
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            # Headers permitidos
+            allowedHeaders:
+              - "*"
+            # Headers expuestos al frontend
+            exposedHeaders:
+              - "Authorization"
+              - "Content-Type"
+              - "X-Requested-With"
+            # Permitir credenciales (cookies, authorization headers)
+            allowCredentials: true
+            # Tiempo de cache para preflight OPTIONS
+            maxAge: 3600
+      # Configuración de rutas existente
       routes:
         - id: auth-service
           uri: lb://ms-auth-service
