@@ -20,8 +20,9 @@ services:
     # Volumen para persistencia de datos
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      # Montar script SQL inicial para ejecución automática
-      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+      # Montar scripts SQL para ejecución automática
+      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ./database/test-data.sql:/docker-entrypoint-initdb.d/02-test-data.sql
     
     # Configuración de red
     networks:
