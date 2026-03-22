@@ -43,12 +43,41 @@ CREATE TABLE categorias (
     tipo_gasto tipo_gasto DEFAULT 'NECESARIO',
     categoria_padre_id UUID NULL,
     created_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_categoria_usuario
+        FOREIGN KEY (user_id)
+        REFERENCES usuarios(id)
+        ON DELETE CASCADE,
     CONSTRAINT fk_categoria_padre
         FOREIGN KEY (categoria_padre_id)
         REFERENCES categorias(id)
         ON DELETE SET NULL,
     CONSTRAINT categorias_nombre_usuario_unique
         UNIQUE (user_id, nombre)
+);
+
+-- =========================
+-- PRESUPUESTOS
+-- =========================
+CREATE TABLE presupuestos (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL,
+    categoria_id UUID NOT NULL,
+    monto_limite NUMERIC(12,2) NOT NULL CHECK (monto_limite >= 0),
+    periodo_inicio DATE NOT NULL,
+    periodo_fin DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_presupuesto_usuario
+        FOREIGN KEY (user_id)
+        REFERENCES usuarios(id)
+        ON DELETE CASCADE,
+    CONSTRAINT fk_presupuesto_categoria
+        FOREIGN KEY (categoria_id)
+        REFERENCES categorias(id)
+        ON DELETE CASCADE,
+    CONSTRAINT presupuestos_usuario_categoria_periodo_unique
+        UNIQUE (user_id, categoria_id, periodo_inicio, periodo_fin),
+    CONSTRAINT chk_presupuesto_fechas
+        CHECK (periodo_inicio < periodo_fin)
 );
 
 -- =========================
@@ -59,6 +88,10 @@ CREATE TABLE comercios (
     user_id UUID NOT NULL,
     nombre TEXT NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_comercio_usuario
+        FOREIGN KEY (user_id)
+        REFERENCES usuarios(id)
+        ON DELETE CASCADE,
     CONSTRAINT comercios_nombre_usuario_unique
         UNIQUE (user_id, nombre)
 );
@@ -73,6 +106,10 @@ CREATE TABLE reglas_clasificacion (
     palabra_clave TEXT,
     categoria_id UUID NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_reglas_usuario
+        FOREIGN KEY (user_id)
+        REFERENCES usuarios(id)
+        ON DELETE CASCADE,
     FOREIGN KEY (comercio_id) REFERENCES comercios(id) ON DELETE CASCADE,
     FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE CASCADE
 );
@@ -90,6 +127,10 @@ CREATE TABLE facturas (
     xml_original TEXT,
     moneda TEXT DEFAULT 'COP',
     created_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_factura_usuario
+        FOREIGN KEY (user_id)
+        REFERENCES usuarios(id)
+        ON DELETE CASCADE,
     FOREIGN KEY (comercio_id) REFERENCES comercios(id) ON DELETE SET NULL
 );
 
@@ -122,6 +163,10 @@ CREATE TABLE movimientos (
     valor NUMERIC(12,2) NOT NULL,
     fecha DATE NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_movimiento_usuario
+        FOREIGN KEY (user_id)
+        REFERENCES usuarios(id)
+        ON DELETE CASCADE,
     FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE RESTRICT,
     FOREIGN KEY (factura_id) REFERENCES facturas(id) ON DELETE SET NULL
 );
@@ -140,7 +185,11 @@ CREATE TABLE cuentas_bancarias (
     moneda TEXT DEFAULT 'COP',
     activa BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    updated_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_cuenta_usuario
+        FOREIGN KEY (user_id)
+        REFERENCES usuarios(id)
+        ON DELETE CASCADE
 );
 
 -- =========================
@@ -158,7 +207,11 @@ CREATE TABLE tarjetas_credito (
     dia_pago INTEGER,
     activa BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    updated_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_tarjeta_usuario
+        FOREIGN KEY (user_id)
+        REFERENCES usuarios(id)
+        ON DELETE CASCADE
 );
 
 -- =========================
@@ -181,6 +234,10 @@ CREATE TABLE creditos (
     activo BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT NOW(),
     updated_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_credito_usuario
+        FOREIGN KEY (user_id)
+        REFERENCES usuarios(id)
+        ON DELETE CASCADE,
     FOREIGN KEY (tarjeta_id) REFERENCES tarjetas_credito(id) ON DELETE SET NULL
 );
 
@@ -200,12 +257,19 @@ CREATE TABLE inversiones (
     fecha_vencimiento DATE,
     activa BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT NOW(),
-    updated_at TIMESTAMP DEFAULT NOW()
+    updated_at TIMESTAMP DEFAULT NOW(),
+    CONSTRAINT fk_inversion_usuario
+        FOREIGN KEY (user_id)
+        REFERENCES usuarios(id)
+        ON DELETE CASCADE
 );
 
 -- =========================
 -- ÍNDICES
 -- =========================
+CREATE INDEX idx_presupuestos_user_id ON presupuestos(user_id);
+CREATE INDEX idx_presupuestos_categoria_id ON presupuestos(categoria_id);
+CREATE INDEX idx_presupuestos_periodo ON presupuestos(periodo_inicio, periodo_fin);
 CREATE INDEX idx_usuarios_username ON usuarios(username);
 CREATE INDEX idx_usuarios_email ON usuarios(email);
 CREATE INDEX idx_categorias_user_id ON categorias(user_id);
@@ -215,4 +279,5 @@ CREATE INDEX idx_facturas_fecha ON facturas(fecha);
 CREATE INDEX idx_movimientos_user_id ON movimientos(user_id);
 CREATE INDEX idx_movimientos_fecha ON movimientos(fecha);
 CREATE INDEX idx_movimientos_categoria ON movimientos(categoria_id);
+CREATE INDEX idx_movimientos_user_categoria_fecha ON movimientos(user_id, categoria_id, fecha);
 CREATE INDEX idx_reglas_clasificacion_user_id ON reglas_clasificacion(user_id);
