@@ -167,6 +167,8 @@ CREATE TABLE movimientos (
         FOREIGN KEY (user_id)
         REFERENCES usuarios(id)
         ON DELETE CASCADE,
+    CONSTRAINT chk_movimientos_valor
+        CHECK (valor >= 0),
     FOREIGN KEY (categoria_id) REFERENCES categorias(id) ON DELETE RESTRICT,
     FOREIGN KEY (factura_id) REFERENCES facturas(id) ON DELETE SET NULL
 );
@@ -270,6 +272,7 @@ CREATE TABLE inversiones (
 CREATE INDEX idx_presupuestos_user_id ON presupuestos(user_id);
 CREATE INDEX idx_presupuestos_categoria_id ON presupuestos(categoria_id);
 CREATE INDEX idx_presupuestos_periodo ON presupuestos(periodo_inicio, periodo_fin);
+CREATE INDEX idx_presupuestos_user_periodo ON presupuestos(user_id, periodo_inicio, periodo_fin);
 CREATE INDEX idx_usuarios_username ON usuarios(username);
 CREATE INDEX idx_usuarios_email ON usuarios(email);
 CREATE INDEX idx_categorias_user_id ON categorias(user_id);
@@ -279,5 +282,6 @@ CREATE INDEX idx_facturas_fecha ON facturas(fecha);
 CREATE INDEX idx_movimientos_user_id ON movimientos(user_id);
 CREATE INDEX idx_movimientos_fecha ON movimientos(fecha);
 CREATE INDEX idx_movimientos_categoria ON movimientos(categoria_id);
+CREATE INDEX idx_movimientos_tipo ON movimientos(tipo);
 CREATE INDEX idx_movimientos_user_categoria_fecha ON movimientos(user_id, categoria_id, fecha);
 CREATE INDEX idx_reglas_clasificacion_user_id ON reglas_clasificacion(user_id);
