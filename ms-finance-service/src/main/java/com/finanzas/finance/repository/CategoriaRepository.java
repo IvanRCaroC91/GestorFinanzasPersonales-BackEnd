@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -55,5 +56,25 @@ public interface CategoriaRepository extends JpaRepository<Categoria, UUID> {
      * Busca una categoría por ID y verifica que pertenezca al usuario.
      * Método de seguridad para evitar acceso a datos de otros usuarios.
      */
-    Categoria findByIdAndUserId(UUID id, UUID userId);
+    Optional<Categoria> findByIdAndUserId(UUID id, UUID userId);
+
+    /**
+     * Busca categorías de un usuario ordenadas por nombre.
+     */
+    List<Categoria> findByUserIdOrderByNombreAsc(UUID userId);
+
+    /**
+     * Busca categorías de un usuario por tipo ordenadas por nombre.
+     */
+    List<Categoria> findByUserIdAndTipoOrderByNombreAsc(UUID userId, Categoria.TipoMovimiento tipo);
+
+    /**
+     * Verifica si existe una categoría con el mismo nombre para el mismo usuario (ignorando mayúsculas).
+     */
+    boolean existsByUserIdAndNombreIgnoreCase(UUID userId, String nombre);
+
+    /**
+     * Verifica si existe una categoría con el mismo nombre para el mismo usuario, excluyendo un ID específico.
+     */
+    boolean existsByUserIdAndNombreIgnoreCaseAndIdNot(UUID userId, String nombre, UUID id);
 }

@@ -5,7 +5,8 @@ import com.finanzas.finance.dto.CategoriaRequest;
 import com.finanzas.finance.dto.CategoriaResponse;
 import com.finanzas.finance.service.CategoriaService;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,10 +26,11 @@ import java.util.UUID;
  * @author Sistema de Finanzas Personales
  * @version 1.0.0
  */
-@Slf4j
 @RestController
 @RequestMapping("/api/v1/finance/categorias")
 public class CategoriaController {
+
+    private static final Logger log = LoggerFactory.getLogger(CategoriaController.class);
 
     private final CategoriaService categoriaService;
 
@@ -76,7 +78,7 @@ public class CategoriaController {
         
         log.info("Request GET /api/v1/finance/categorias - Usuario: {}", userId);
         
-        List<CategoriaResponse> categorias = categoriaService.listarCategorias(userId);
+        List<CategoriaResponse> categorias = categoriaService.listarCategoriasPorUsuario(userId);
         
         ApiResponse<List<CategoriaResponse>> apiResponse = ApiResponse.success(
             "Categorías listadas correctamente", categorias);
@@ -110,24 +112,26 @@ public class CategoriaController {
     }
 
     /**
-     * Lista categorías raíz (sin categoría padre) del usuario.
+     * Busca una categoría por ID.
      * 
      * HTTP Method: GET
-     * Path: /api/v1/finance/categorias?raiz=true
+     * Path: /api/v1/finance/categorias/{id}
      * 
+     * @param id ID de la categoría a buscar
      * @param userId ID del usuario autenticado (header)
-     * @return Lista de categorías raíz
+     * @return CategoriaResponse con los datos de la categoría
      */
-    @GetMapping(params = "raiz")
-    public ResponseEntity<ApiResponse<List<CategoriaResponse>>> listarCategoriasRaiz(
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<CategoriaResponse>> buscarCategoria(
+            @PathVariable UUID id,
             @RequestHeader("X-User-Id") UUID userId) {
         
-        log.info("Request GET /api/v1/finance/categorias?raiz=true - Usuario: {}", userId);
+        log.info("Request GET /api/v1/finance/categorias/{} - Usuario: {}", id, userId);
         
-        List<CategoriaResponse> categorias = categoriaService.listarCategoriasRaiz(userId);
+        CategoriaResponse response = categoriaService.buscarCategoriaPorId(id, userId);
         
-        ApiResponse<List<CategoriaResponse>> apiResponse = ApiResponse.success(
-            "Categorías raíz listadas correctamente", categorias);
+        ApiResponse<CategoriaResponse> apiResponse = ApiResponse.success(
+            "Categoría encontrada correctamente", response);
         
         return ResponseEntity.ok(apiResponse);
     }
@@ -167,7 +171,7 @@ public class CategoriaController {
      * 
      * @param id ID de la categoría a eliminar
      * @param userId ID del usuario autenticado (header)
-     * @return Respuesta vacía con código 204
+     * @return Respuesta con ApiResponse
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> eliminarCategoria(
@@ -180,6 +184,6 @@ public class CategoriaController {
         
         ApiResponse<Void> apiResponse = ApiResponse.success("Categoría eliminada correctamente");
         
-        return new ResponseEntity<>(apiResponse, HttpStatus.NO_CONTENT);
+        return ResponseEntity.ok(apiResponse);
     }
 }

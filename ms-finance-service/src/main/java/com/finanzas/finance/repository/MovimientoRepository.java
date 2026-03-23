@@ -77,15 +77,30 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, UUID> {
             @Param("fechaFin") LocalDate fechaFin);
 
     /**
-     * Calcula el total de egresos de un usuario en un período.
+     * Lista movimientos de un usuario ordenados por fecha descendente.
+     */
+    List<Movimiento> findByUserIdOrderByFechaDesc(UUID userId);
+
+    /**
+     * Lista movimientos de un usuario por tipo ordenados por fecha descendente.
+     */
+    List<Movimiento> findByUserIdAndTipoOrderByFechaDesc(UUID userId, Movimiento.TipoMovimiento tipo);
+
+    /**
+     * Cuenta movimientos de una categoría para un usuario.
+     */
+    long countByCategoriaIdAndUserId(UUID categoriaId, UUID userId);
+
+    /**
+     * Suma valores de movimientos por categoría, usuario y mes/año.
      */
     @Query("SELECT COALESCE(SUM(m.valor), 0) " +
            "FROM Movimiento m " +
-           "WHERE m.userId = :userId " +
-           "AND m.tipo = 'EGRESO' " +
-           "AND m.fecha BETWEEN :fechaInicio AND :fechaFin")
-    BigDecimal sumEgresosByUsuarioAndPeriodo(
+           "WHERE m.categoriaId = :categoriaId " +
+           "AND m.userId = :userId " +
+           "AND DATE_FORMAT(m.fecha, 'YYYY-MM') = :mesAnio")
+    BigDecimal sumValorByCategoriaIdAndUserIdAndMesAnio(
+            @Param("categoriaId") UUID categoriaId,
             @Param("userId") UUID userId,
-            @Param("fechaInicio") LocalDate fechaInicio,
-            @Param("fechaFin") LocalDate fechaFin);
+            @Param("mesAnio") String mesAnio);
 }

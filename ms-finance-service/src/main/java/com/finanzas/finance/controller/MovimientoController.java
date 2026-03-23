@@ -5,7 +5,8 @@ import com.finanzas.finance.dto.MovimientoRequest;
 import com.finanzas.finance.dto.MovimientoResponse;
 import com.finanzas.finance.service.MovimientoService;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,10 +26,11 @@ import java.util.UUID;
  * @author Sistema de Finanzas Personales
  * @version 1.0.0
  */
-@Slf4j
 @RestController
 @RequestMapping("/api/v1/finance/movimientos")
 public class MovimientoController {
+
+    private static final Logger log = LoggerFactory.getLogger(MovimientoController.class);
 
     private final MovimientoService movimientoService;
 
@@ -144,7 +146,7 @@ public class MovimientoController {
      * 
      * @param id ID del movimiento a eliminar
      * @param userId ID del usuario autenticado (header)
-     * @return Respuesta vacía con código 204
+     * @return Respuesta con ApiResponse
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> eliminarMovimiento(
@@ -157,6 +159,6 @@ public class MovimientoController {
         
         ApiResponse<Void> apiResponse = ApiResponse.success("Movimiento eliminado correctamente");
         
-        return new ResponseEntity<>(apiResponse, HttpStatus.NO_CONTENT);
+        return ResponseEntity.ok(apiResponse);
     }
 }

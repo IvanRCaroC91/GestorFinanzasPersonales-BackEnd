@@ -1,13 +1,17 @@
 package com.finanzas.finance.exception;
 
 import com.finanzas.finance.dto.ApiResponse;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import jakarta.validation.ConstraintViolationException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,9 +31,10 @@ import java.util.Map;
  * @author Sistema de Finanzas Personales
  * @version 1.0.0
  */
-@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     /**
      * Maneja excepciones de recursos no encontrados.
@@ -123,9 +128,9 @@ public class GlobalExceptionHandler {
      * @param request Contexto del request
      * @return Respuesta con error 400 y detalles de validación
      */
-    @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Object>> handleValidationExceptions(
-            org.springframework.web.bind.MethodArgumentNotValidException ex, WebRequest request) {
+            MethodArgumentNotValidException ex, WebRequest request) {
         
         log.warn("Error de validación de DTO: {}", ex.getMessage());
         
@@ -140,6 +145,50 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Maneja excepciones de bind de parámetros (@RequestParam inválidos).
+     * 
+     * @param ex Excepción de bind
+     * @param request Contexto del request
+     * @return Respuesta con error 400
+     */
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<ApiResponse<Object>> handleTypeMismatchException(
+            MethodArgumentTypeMismatchException ex, WebRequest request) {
+        
+        log.warn("Error de tipo de parámetro: {}", ex.getMessage());
+        
+        String message = String.format("El parámetro '%s' tiene un tipo inválido. Se esperaba: %s", 
+                ex.getName(), ex.getRequiredType().getSimpleName());
+        
+        ApiResponse<Object> response = ApiResponse.error(message);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * Maneja excepciones de constraint violation (@Valid).
+     * 
+     * @param ex Excepción de constraint
+     * @param request Contexto del request
+     * @return Respuesta con error 400
+     */
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiResponse<Object>> handleConstraintViolationException(
+            ConstraintViolationException ex, WebRequest request) {
+        
+        log.warn("Error de validación de constraints: {}", ex.getMessage());
+        
+        Map<String, String> errors = new HashMap<>();
+        ex.getConstraintViolations().forEach(violation -> {
+            String fieldName = violation.getPropertyPath().toString();
+            String message = violation.getMessage();
+            errors.put(fieldName, message);
+        });
+        
+        ApiResponse<Object> response = ApiResponse.error("Error de validación en los parámetros", errors);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
+    /**
      * Maneja excepciones genéricas no controladas.
      * 
      * @param ex Excepción capturada
@@ -150,8 +199,11 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<Object>> handleGlobalException(
             Exception ex, WebRequest request) {
         
-        log.error("Error no controlado en la API: ", ex);
+        // Loggear error completo con stacktrace para debugging
+        log.error("Error no controlado en la API - URI: {}", 
+                request.getDescription(false), ex);
         
+        // NO exponer detalles internos al cliente por seguridad
         ApiResponse<Object> response = ApiResponse.error("Error interno del servidor");
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }

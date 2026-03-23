@@ -6,7 +6,8 @@ import com.finanzas.finance.dto.PresupuestoResponse;
 import com.finanzas.finance.dto.PresupuestoEjecucionResponse;
 import com.finanzas.finance.service.PresupuestoService;
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,19 +21,19 @@ import java.util.UUID;
  * Controller REST para gestión de presupuestos financieros.
  * 
  * Expone endpoints para operaciones CRUD sobre presupuestos,
- * incluyendo el endpoint diferencial de ejecución financiera.
- * Mantiene separación de responsabilidades y delega toda la lógica
- * de negocio al Service correspondiente.
+ * manteniendo separación de responsabilidades y delegando
+ * toda la lógica de negocio al Service correspondiente.
  * 
  * Base path: /api/v1/finance/presupuestos
  * 
  * @author Sistema de Finanzas Personales
  * @version 1.0.0
  */
-@Slf4j
 @RestController
 @RequestMapping("/api/v1/finance/presupuestos")
 public class PresupuestoController {
+
+    private static final Logger log = LoggerFactory.getLogger(PresupuestoController.class);
 
     private final PresupuestoService presupuestoService;
 
@@ -80,7 +81,7 @@ public class PresupuestoController {
         
         log.info("Request GET /api/v1/finance/presupuestos - Usuario: {}", userId);
         
-        List<PresupuestoResponse> presupuestos = presupuestoService.listarPresupuestos(userId);
+        List<PresupuestoResponse> presupuestos = presupuestoService.listarPresupuestosPorUsuario(userId);
         
         ApiResponse<List<PresupuestoResponse>> apiResponse = ApiResponse.success(
             "Presupuestos listados correctamente", presupuestos);
@@ -89,81 +90,51 @@ public class PresupuestoController {
     }
 
     /**
-     * Lista presupuestos activos en una fecha específica.
+     * Lista presupuestos del usuario filtrados por mes/año.
      * 
      * HTTP Method: GET
-     * Path: /api/v1/finance/presupuestos?fecha={fecha}
+     * Path: /api/v1/finance/presupuestos?mesAnio={mesAnio}
      * 
-     * @param fecha Fecha para consultar presupuestos activos (yyyy-MM-dd)
+     * @param mesAnio Mes y año en formato YYYY-MM
      * @param userId ID del usuario autenticado (header)
-     * @return Lista de presupuestos activos en la fecha
+     * @return Lista de presupuestos filtrados por mes/año
      */
-    @GetMapping(params = "fecha")
-    public ResponseEntity<ApiResponse<List<PresupuestoResponse>>> listarPresupuestosActivos(
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fecha,
+    @GetMapping(params = "periodoInicio")
+    public ResponseEntity<ApiResponse<List<PresupuestoResponse>>> listarPresupuestosPorPeriodo(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodoInicio,
             @RequestHeader("X-User-Id") UUID userId) {
         
-        log.info("Request GET /api/v1/finance/presupuestos?fecha={} - Usuario: {}", fecha, userId);
+        log.info("Request GET /api/v1/finance/presupuestos?periodoInicio={} - Usuario: {}", periodoInicio, userId);
         
-        List<PresupuestoResponse> presupuestos = presupuestoService.listarPresupuestosActivos(userId, fecha);
+        List<PresupuestoResponse> presupuestos = presupuestoService.listarPresupuestosPorPeriodo(userId, periodoInicio);
         
         ApiResponse<List<PresupuestoResponse>> apiResponse = ApiResponse.success(
-            "Presupuestos activos listados correctamente", presupuestos);
+            "Presupuestos filtrados por período correctamente", presupuestos);
         
         return ResponseEntity.ok(apiResponse);
     }
 
     /**
-     * Obtiene un presupuesto específico por ID.
+     * Busca un presupuesto por ID.
      * 
      * HTTP Method: GET
      * Path: /api/v1/finance/presupuestos/{id}
      * 
      * @param id ID del presupuesto a buscar
      * @param userId ID del usuario autenticado (header)
-     * @return PresupuestoResponse encontrado
+     * @return PresupuestoResponse con los datos del presupuesto
      */
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<PresupuestoResponse>> obtenerPresupuesto(
+    public ResponseEntity<ApiResponse<PresupuestoResponse>> buscarPresupuesto(
             @PathVariable UUID id,
             @RequestHeader("X-User-Id") UUID userId) {
         
         log.info("Request GET /api/v1/finance/presupuestos/{} - Usuario: {}", id, userId);
         
-        PresupuestoResponse response = presupuestoService.obtenerPresupuestoPorId(id, userId);
+        PresupuestoResponse response = presupuestoService.buscarPresupuestoPorId(id, userId);
         
         ApiResponse<PresupuestoResponse> apiResponse = ApiResponse.success(
-            "Presupuesto obtenido correctamente", response);
-        
-        return ResponseEntity.ok(apiResponse);
-    }
-
-    /**
-     * 🔥 ENDPOINT DIFERENCIAL - Calcula la ejecución financiera de un presupuesto.
-     * 
-     * HTTP Method: GET
-     * Path: /api/v1/finance/presupuestos/{id}/ejecucion
-     * 
-     * Este método es CRÍTICO y calcula métricas clave del rendimiento del presupuesto:
-     * - totalGastado: Suma de egresos en el período
-     * - disponible: montoLimite - totalGastado
-     * - porcentajeUsado: (totalGastado / montoLimite) * 100
-     * 
-     * @param id ID del presupuesto a evaluar
-     * @param userId ID del usuario autenticado (header)
-     * @return PresupuestoEjecucionResponse con métricas de ejecución
-     */
-    @GetMapping("/{id}/ejecucion")
-    public ResponseEntity<ApiResponse<PresupuestoEjecucionResponse>> calcularEjecucionPresupuesto(
-            @PathVariable UUID id,
-            @RequestHeader("X-User-Id") UUID userId) {
-        
-        log.info("Request GET /api/v1/finance/presupuestos/{}/ejecucion - Usuario: {}", id, userId);
-        
-        PresupuestoEjecucionResponse response = presupuestoService.calcularEjecucionPresupuesto(id, userId);
-        
-        ApiResponse<PresupuestoEjecucionResponse> apiResponse = ApiResponse.success(
-            "Ejecución financiera calculada correctamente", response);
+            "Presupuesto encontrado correctamente", response);
         
         return ResponseEntity.ok(apiResponse);
     }
@@ -203,7 +174,7 @@ public class PresupuestoController {
      * 
      * @param id ID del presupuesto a eliminar
      * @param userId ID del usuario autenticado (header)
-     * @return Respuesta vacía con código 204
+     * @return Respuesta con ApiResponse
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> eliminarPresupuesto(
@@ -216,6 +187,31 @@ public class PresupuestoController {
         
         ApiResponse<Void> apiResponse = ApiResponse.success("Presupuesto eliminado correctamente");
         
-        return new ResponseEntity<>(apiResponse, HttpStatus.NO_CONTENT);
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    /**
+     * Obtiene la ejecución financiera de los presupuestos del usuario para un mes específico.
+     * 
+     * HTTP Method: GET
+     * Path: /api/v1/finance/presupuestos/ejecucion?mesAnio={mesAnio}
+     * 
+     * @param mesAnio Mes y año en formato YYYY-MM
+     * @param userId ID del usuario autenticado (header)
+     * @return Lista con la ejecución de los presupuestos
+     */
+    @GetMapping("/ejecucion")
+    public ResponseEntity<ApiResponse<List<PresupuestoEjecucionResponse>>> obtenerEjecucionPresupuestos(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodoInicio,
+            @RequestHeader("X-User-Id") UUID userId) {
+        
+        log.info("Request GET /api/v1/finance/presupuestos/ejecucion?periodoInicio={} - Usuario: {}", periodoInicio, userId);
+        
+        List<PresupuestoEjecucionResponse> ejecuciones = presupuestoService.obtenerEjecucionPresupuestos(userId, periodoInicio);
+        
+        ApiResponse<List<PresupuestoEjecucionResponse>> apiResponse = ApiResponse.success(
+            "Ejecución de presupuestos obtenida correctamente", ejecuciones);
+        
+        return ResponseEntity.ok(apiResponse);
     }
 }

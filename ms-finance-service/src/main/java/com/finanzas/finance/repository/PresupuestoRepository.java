@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -77,21 +78,27 @@ public interface PresupuestoRepository extends JpaRepository<Presupuesto, UUID> 
 
     /**
      * Busca un presupuesto por ID y verifica que pertenezca al usuario.
-     * Método de seguridad para evitar acceso a datos de otros usuarios.
      */
-    Presupuesto findByIdAndUserId(UUID id, UUID userId);
+    Optional<Presupuesto> findByIdAndUserId(UUID id, UUID userId);
 
     /**
-     * Busca presupuestos que overlapan con un nuevo período.
-     * Útil para validación antes de crear nuevos presupuestos.
+     * Lista presupuestos de un usuario ordenados por período descendente y categoría.
      */
-    @Query("SELECT p FROM Presupuesto p " +
-           "WHERE p.userId = :userId " +
-           "AND p.categoriaId = :categoriaId " +
-           "AND ((p.periodoInicio <= :periodoFin AND p.periodoFin >= :periodoInicio))")
-    List<Presupuesto> findOverlappingPeriodos(
-            @Param("userId") UUID userId,
-            @Param("categoriaId") UUID categoriaId,
-            @Param("periodoInicio") LocalDate periodoInicio,
-            @Param("periodoFin") LocalDate periodoFin);
+    List<Presupuesto> findByUserIdOrderByPeriodoInicioDescCategoriaIdAsc(UUID userId);
+
+    /**
+     * Lista presupuestos de un usuario por período ordenados por categoría.
+     */
+    List<Presupuesto> findByUserIdAndPeriodoInicioOrderByCategoriaIdAsc(UUID userId, LocalDate periodoInicio);
+
+    /**
+     * Verifica si existe un presupuesto para categoría y período de usuario.
+     */
+    boolean existsByCategoriaIdAndPeriodoInicioAndUserId(UUID categoriaId, LocalDate periodoInicio, UUID userId);
+
+    /**
+     * Verifica si existe un presupuesto para categoría y período de usuario, excluyendo un ID específico.
+     */
+    boolean existsByCategoriaIdAndPeriodoInicioAndUserIdAndIdNot(
+            UUID categoriaId, LocalDate periodoInicio, UUID userId, UUID id);
 }
