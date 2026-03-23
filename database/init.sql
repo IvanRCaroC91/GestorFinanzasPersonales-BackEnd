@@ -5,15 +5,6 @@
 -- Compatible con PostgreSQL 14+
 
 -- =========================
--- TIPOS ENUM
--- =========================
-CREATE TYPE tipo_movimiento AS ENUM ('INGRESO', 'EGRESO');
-CREATE TYPE tipo_gasto AS ENUM ('NECESARIO', 'NO NECESARIO', 'OCASIONAL');
-CREATE TYPE estado_factura AS ENUM ('PENDIENTE', 'PROCESADA', 'CANCELADA');
-CREATE TYPE tipo_credito AS ENUM ('TARJETA', 'VIVIENDA', 'VEHICULO', 'ESTUDIO', 'LIBRE');
-CREATE TYPE tipo_inversion AS ENUM ('CDT', 'AHORRO', 'FONDO', 'OTRO');
-
--- =========================
 -- USUARIOS
 -- =========================
 CREATE TABLE usuarios (
@@ -39,8 +30,8 @@ CREATE TABLE categorias (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     nombre TEXT NOT NULL,
-    tipo tipo_movimiento NOT NULL,
-    tipo_gasto tipo_gasto DEFAULT 'NECESARIO',
+    tipo VARCHAR(20) NOT NULL,
+    tipo_gasto VARCHAR(20) DEFAULT 'NECESARIO',
     categoria_padre_id UUID NULL,
     created_at TIMESTAMP DEFAULT NOW(),
     CONSTRAINT fk_categoria_usuario
@@ -123,7 +114,7 @@ CREATE TABLE facturas (
     comercio_id UUID,
     fecha DATE NOT NULL,
     total NUMERIC(12,2) CHECK (total >= 0),
-    estado estado_factura DEFAULT 'PENDIENTE',
+    estado VARCHAR(20) DEFAULT 'PENDIENTE',
     xml_original TEXT,
     moneda TEXT DEFAULT 'COP',
     created_at TIMESTAMP DEFAULT NOW(),
@@ -159,7 +150,7 @@ CREATE TABLE movimientos (
     categoria_id UUID NOT NULL,
     factura_id UUID,
     descripcion TEXT NOT NULL,
-    tipo tipo_movimiento NOT NULL,
+    tipo VARCHAR(20) NOT NULL,
     valor NUMERIC(12,2) NOT NULL,
     fecha DATE NOT NULL,
     created_at TIMESTAMP DEFAULT NOW(),
@@ -202,7 +193,7 @@ CREATE TABLE tarjetas_credito (
     user_id UUID NOT NULL,
     banco TEXT NOT NULL,
     nombre TEXT NOT NULL,
-    tipo tipo_credito NOT NULL,
+    tipo VARCHAR(20) NOT NULL,
     limite_credito NUMERIC(12,2) CHECK (limite_credito >= 0),
     saldo_actual NUMERIC(12,2) DEFAULT 0,
     fecha_corte INTEGER,
@@ -225,7 +216,7 @@ CREATE TABLE creditos (
     tarjeta_id UUID,
     banco TEXT NOT NULL,
     descripcion TEXT NOT NULL,
-    tipo tipo_credito NOT NULL,
+    tipo VARCHAR(20) NOT NULL,
     monto_total NUMERIC(12,2) CHECK (monto_total >= 0),
     tasa_interes NUMERIC(5,2) CHECK (tasa_interes >= 0),
     plazo_meses INTEGER CHECK (plazo_meses > 0),
@@ -250,7 +241,7 @@ CREATE TABLE inversiones (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL,
     nombre TEXT NOT NULL,
-    tipo tipo_inversion NOT NULL,
+    tipo VARCHAR(20) NOT NULL,
     institucion TEXT NOT NULL,
     monto_invertido NUMERIC(12,2) CHECK (monto_invertido >= 0),
     monto_actual NUMERIC(12,2) CHECK (monto_actual >= 0),

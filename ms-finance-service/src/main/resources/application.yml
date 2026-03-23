@@ -6,9 +6,9 @@ spring:
     name: ms-finance-service
   
   datasource:
-    url: jdbc:postgresql://localhost:5432/finanzas_personales
-    username: postgres
-    password: postgres
+    url: jdbc:postgresql://localhost:5432/finanzas_db
+    username: admin
+    password: admin123
     driver-class-name: org.postgresql.Driver
   
   jpa:

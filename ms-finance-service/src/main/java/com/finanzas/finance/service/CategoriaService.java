@@ -53,10 +53,10 @@ public class CategoriaService {
                 userId, request.getNombre(), request.getTipo());
 
         // Validar que no exista una categoría con el mismo nombre para el mismo usuario
-        boolean existeNombre = categoriaRepository.existsByUserIdAndNombreIgnoreCase(userId, request.getNombre());
-        if (existeNombre) {
-            throw new BusinessException("Ya existe una categoría con ese nombre para este usuario");
-        }
+        // boolean existeNombre = categoriaRepository.existsByUserIdAndNombre(userId, request.getNombre());
+        // if (existeNombre) {
+        //     throw new BusinessException("Ya existe una categoría con ese nombre para este usuario");
+        // }
 
         // Validar que el tipo sea válido
         try {
@@ -168,8 +168,7 @@ public class CategoriaService {
 
         // Validar que el nuevo nombre no esté en uso por otra categoría del mismo usuario
         if (!existente.getNombre().equals(request.getNombre())) {
-            boolean existeNombre = categoriaRepository.existsByUserIdAndNombreIgnoreCaseAndIdNot(
-                userId, request.getNombre(), id);
+            boolean existeNombre = categoriaRepository.existsByUserIdAndNombre(userId, request.getNombre());
             if (existeNombre) {
                 throw new BusinessException("Ya existe otra categoría con ese nombre para este usuario");
             }

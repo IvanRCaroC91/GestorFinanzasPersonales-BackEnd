@@ -21,37 +21,37 @@ INSERT INTO categorias (user_id, nombre, tipo, tipo_gasto) VALUES
 ((SELECT id FROM usuarios WHERE username = 'admin'), 'Alquiler', 'EGRESO', 'NECESARIO'),
 ((SELECT id FROM usuarios WHERE username = 'admin'), 'Supermercado', 'EGRESO', 'NECESARIO'),
 ((SELECT id FROM usuarios WHERE username = 'admin'), 'Transporte', 'EGRESO', 'NECESARIO'),
-((SELECT id FROM usuarios WHERE username = 'admin'), 'Entretenimiento', 'EGRESO', 'NO NECESARIO'),
+((SELECT id FROM usuarios WHERE username = 'admin'), 'Entretenimiento', 'EGRESO', 'NO_NECESARIO'),
 ((SELECT id FROM usuarios WHERE username = 'admin'), 'Emergencias', 'EGRESO', 'OCASIONAL'),
 
 -- Categorías para user
 ((SELECT id FROM usuarios WHERE username = 'user'), 'Salario', 'INGRESO', 'NECESARIO'),
 ((SELECT id FROM usuarios WHERE username = 'user'), 'Comida', 'EGRESO', 'NECESARIO'),
 ((SELECT id FROM usuarios WHERE username = 'user'), 'Facturas', 'EGRESO', 'NECESARIO'),
-((SELECT id FROM usuarios WHERE username = 'user'), 'Ocio', 'EGRESO', 'NO NECESARIO');
+((SELECT id FROM usuarios WHERE username = 'user'), 'Ocio', 'EGRESO', 'NO_NECESARIO');
 
 -- =========================
 -- MOVIMIENTOS DE EJEMPLO
 -- =========================
-INSERT INTO movimientos (user_id, categoria_id, monto, descripcion, tipo, fecha) VALUES
+INSERT INTO movimientos (user_id, categoria_id, factura_id, descripcion, tipo, valor, fecha, created_at) VALUES
 -- Movimientos para admin
 ((SELECT id FROM usuarios WHERE username = 'admin'), 
  (SELECT id FROM categorias WHERE user_id = (SELECT id FROM usuarios WHERE username = 'admin') AND nombre = 'Salario'), 
- 3000000.00, 'Salario mensual', 'INGRESO', '2026-01-15'),
+ NULL, 'Salario mensual', 'INGRESO', 3000000.00, '2026-01-15', NOW()),
 ((SELECT id FROM usuarios WHERE username = 'admin'), 
  (SELECT id FROM categorias WHERE user_id = (SELECT id FROM usuarios WHERE username = 'admin') AND nombre = 'Alquiler'), 
- 800000.00, 'Alquiler apartamento', 'EGRESO', '2026-01-05'),
+ NULL, 'Alquiler apartamento', 'EGRESO', 800000.00, '2026-01-05', NOW()),
 ((SELECT id FROM usuarios WHERE username = 'admin'), 
  (SELECT id FROM categorias WHERE user_id = (SELECT id FROM usuarios WHERE username = 'admin') AND nombre = 'Supermercado'), 
- 450000.00, 'Compras mes', 'EGRESO', '2026-01-10'),
+ NULL, 'Compras mes', 'EGRESO', 450000.00, '2026-01-10', NOW()),
 
 -- Movimientos para user
 ((SELECT id FROM usuarios WHERE username = 'user'), 
  (SELECT id FROM categorias WHERE user_id = (SELECT id FROM usuarios WHERE username = 'user') AND nombre = 'Salario'), 
- 2000000.00, 'Salario quincenal', 'INGRESO', '2026-01-15'),
+ NULL, 'Salario quincenal', 'INGRESO', 2000000.00, '2026-01-15', NOW()),
 ((SELECT id FROM usuarios WHERE username = 'user'), 
  (SELECT id FROM categorias WHERE user_id = (SELECT id FROM usuarios WHERE username = 'user') AND nombre = 'Comida'), 
- 300000.00, 'Supermercado', 'EGRESO', '2026-01-08');
+ NULL, 'Supermercado', 'EGRESO', 300000.00, '2026-01-08', NOW());
 
 -- =========================
 -- COMENTARIOS DE USO

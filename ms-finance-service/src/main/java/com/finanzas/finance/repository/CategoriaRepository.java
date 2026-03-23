@@ -69,12 +69,7 @@ public interface CategoriaRepository extends JpaRepository<Categoria, UUID> {
     List<Categoria> findByUserIdAndTipoOrderByNombreAsc(UUID userId, Categoria.TipoMovimiento tipo);
 
     /**
-     * Verifica si existe una categoría con el mismo nombre para el mismo usuario (ignorando mayúsculas).
-     */
-    boolean existsByUserIdAndNombreIgnoreCase(UUID userId, String nombre);
-
-    /**
      * Verifica si existe una categoría con el mismo nombre para el mismo usuario, excluyendo un ID específico.
      */
-    boolean existsByUserIdAndNombreIgnoreCaseAndIdNot(UUID userId, String nombre, UUID id);
+    // boolean existsByUserIdAndNombreIgnoreCaseAndIdNot(UUID userId, String nombre, UUID id);
 }
