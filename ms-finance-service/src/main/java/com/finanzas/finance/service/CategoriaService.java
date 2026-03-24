@@ -53,10 +53,10 @@ public class CategoriaService {
                 userId, request.getNombre(), request.getTipo());
 
         // Validar que no exista una categoría con el mismo nombre para el mismo usuario
-        // boolean existeNombre = categoriaRepository.existsByUserIdAndNombre(userId, request.getNombre());
-        // if (existeNombre) {
-        //     throw new BusinessException("Ya existe una categoría con ese nombre para este usuario");
-        // }
+        boolean existeNombre = categoriaRepository.existsByUserIdAndNombre(userId, request.getNombre());
+        if (existeNombre) {
+            throw new BusinessException("Ya existe una categoría con ese nombre para este usuario");
+        }
 
         // Validar que el tipo sea válido
         try {
