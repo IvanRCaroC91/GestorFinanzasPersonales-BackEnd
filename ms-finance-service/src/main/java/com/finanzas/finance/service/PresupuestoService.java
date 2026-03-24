@@ -280,7 +280,15 @@ public class PresupuestoService {
                 }
 
                 return new PresupuestoEjecucionResponse(
-                    presupuesto.getMontoLimite(), montoGastado);
+                    presupuesto.getId(),
+                    presupuesto.getCategoriaId(),
+                    presupuesto.getMontoLimite(),
+                    montoGastado,
+                    montoDisponible,
+                    porcentajeEjecucion,
+                    presupuesto.getPeriodoInicio(),
+                    presupuesto.getPeriodoFin()
+                );
             })
             .collect(Collectors.toList());
     }
