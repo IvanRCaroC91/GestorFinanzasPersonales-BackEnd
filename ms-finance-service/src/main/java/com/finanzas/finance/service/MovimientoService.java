@@ -3,13 +3,14 @@ package com.finanzas.finance.service;
 import com.finanzas.finance.dto.MovimientoRequest;
 import com.finanzas.finance.dto.MovimientoResponse;
 import com.finanzas.finance.entity.Movimiento;
-import com.finanzas.finance.exception.ResourceNotFoundException;
 import com.finanzas.finance.exception.BusinessException;
 import com.finanzas.finance.repository.MovimientoRepository;
 import com.finanzas.finance.repository.CategoriaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -48,34 +49,29 @@ public class MovimientoService {
      * @param userId ID del usuario autenticado
      * @return MovimientoResponse con los datos guardados
      * @throws BusinessException si las validaciones fallan
-     * @throws ResourceNotFoundException si la categoría no existe
      */
     public MovimientoResponse crearMovimiento(MovimientoRequest request, UUID userId) {
-        log.info("Creando movimiento para usuario: {} - Tipo: {} - Valor: {}", 
-                userId, request.getTipo(), request.getValor());
+        log.info("Creando movimiento para usuario: {} - Categoría: {} - Valor: {}", 
+                userId, request.getCategoriaId(), request.getValor());
 
         // Validar que la categoría exista y pertenezca al usuario
         var categoria = categoriaRepository.findByIdAndUserId(request.getCategoriaId(), userId)
-            .orElseThrow(() -> new ResourceNotFoundException(
-                "La categoría no existe o no pertenece al usuario"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoría no encontrada"));
 
-        // Validar que el tipo de movimiento coincida con el tipo de categoría
-        if (!request.getTipo().equals(categoria.getTipo().name())) {
-            throw new BusinessException(
-                "El tipo de movimiento no coincide con el tipo de categoría");
+        // Validar que el valor sea positivo
+        if (request.getValor().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException("El valor del movimiento debe ser mayor a cero");
         }
 
-        // Validar que el valor sea positivo para ingresos y negativo para egresos
-        if ("INGRESO".equals(request.getTipo()) && request.getValor().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessException("El valor de un ingreso debe ser positivo");
-        } else if ("EGRESO".equals(request.getTipo()) && request.getValor().compareTo(BigDecimal.ZERO) >= 0) {
-            throw new BusinessException("El valor de un egreso debe ser negativo");
+        // Validar consistencia entre tipo de movimiento y tipo de categoría
+        if (!categoria.getTipo().name().equals(request.getTipo())) {
+            throw new BusinessException("El tipo de movimiento no coincide con el tipo de categoría");
         }
 
         // Crear entidad
         Movimiento movimiento = new Movimiento();
-        movimiento.setUserId(userId);
         movimiento.setCategoriaId(request.getCategoriaId());
+        movimiento.setUserId(userId);
         movimiento.setDescripcion(request.getDescripcion());
         movimiento.setTipo(Movimiento.TipoMovimiento.valueOf(request.getTipo()));
         movimiento.setValor(request.getValor());
@@ -83,16 +79,14 @@ public class MovimientoService {
         movimiento.setFacturaId(request.getFacturaId());
 
         // Guardar
-        Movimiento guardado = movimientoRepository.save(movimiento);
+        Movimiento saved = movimientoRepository.save(movimiento);
         
-        log.info("Movimiento creado exitosamente - ID: {} - Usuario: {}", 
-                guardado.getId(), userId);
-        
-        return mapToResponse(guardado);
+        log.info("Movimiento creado exitosamente - ID: {}", saved.getId());
+        return mapToResponse(saved);
     }
 
     /**
-     * Lista todos los movimientos del usuario autenticado.
+     * Lista todos los movimientos del usuario.
      * 
      * @param userId ID del usuario autenticado
      * @return Lista de movimientos del usuario
@@ -100,44 +94,30 @@ public class MovimientoService {
     @Transactional(readOnly = true)
     public List<MovimientoResponse> listarMovimientosPorUsuario(UUID userId) {
         log.info("Listando movimientos para usuario: {}", userId);
+
+        List<Movimiento> movimientos = movimientoRepository.findByUserId(userId);
         
-        List<Movimiento> movimientos = movimientoRepository.findByUserIdOrderByFechaDesc(userId);
-        
-        List<MovimientoResponse> responses = movimientos.stream()
-            .map(this::mapToResponse)
-            .collect(Collectors.toList());
-            
-        log.info("Se encontraron {} movimientos para usuario: {}", responses.size(), userId);
-        return responses;
+        return movimientos.stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
     /**
-     * Lista movimientos del usuario filtrados por tipo.
+     * Busca un movimiento por ID verificando que pertenezca al usuario.
      * 
+     * @param id ID del movimiento a buscar
      * @param userId ID del usuario autenticado
-     * @param tipo Tipo de movimiento (INGRESO|EGRESO)
-     * @return Lista de movimientos filtrados por tipo
-     * @throws BusinessException si el tipo es inválido
+     * @return MovimientoResponse con los datos del movimiento
      */
     @Transactional(readOnly = true)
-    public List<MovimientoResponse> listarMovimientosPorTipo(UUID userId, String tipo) {
-        log.info("Listando movimientos por tipo: {} para usuario: {}", tipo, userId);
+    public MovimientoResponse buscarMovimientoPorId(UUID id, UUID userId) {
+        log.info("Buscando movimiento ID: {} para usuario: {}", id, userId);
         
-        try {
-            Movimiento.TipoMovimiento tipoEnum = Movimiento.TipoMovimiento.valueOf(tipo);
-            List<Movimiento> movimientos = movimientoRepository.findByUserIdAndTipoOrderByFechaDesc(userId, tipoEnum);
-            
-            List<MovimientoResponse> responses = movimientos.stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-                
-            log.info("Se encontraron {} movimientos de tipo {} para usuario: {}", 
-                    responses.size(), tipo, userId);
-            return responses;
-            
-        } catch (IllegalArgumentException e) {
-            throw new BusinessException("Tipo de movimiento inválido. Debe ser INGRESO o EGRESO");
-        }
+        Movimiento movimiento = movimientoRepository.findById(id)
+            .filter(m -> m.getUserId().equals(userId))
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Movimiento no encontrado"));
+        
+        return mapToResponse(movimiento);
     }
 
     /**
@@ -147,37 +127,27 @@ public class MovimientoService {
      * @param request Nuevos datos del movimiento
      * @param userId ID del usuario autenticado
      * @return MovimientoResponse actualizado
-     * @throws ResourceNotFoundException si el movimiento no existe
-     * @throws BusinessException si hay violaciones de reglas de negocio
      */
     public MovimientoResponse actualizarMovimiento(UUID id, MovimientoRequest request, UUID userId) {
         log.info("Actualizando movimiento ID: {} para usuario: {}", id, userId);
 
         // Validar que el movimiento exista y pertenezca al usuario
         Movimiento existente = movimientoRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("El movimiento no existe"));
+            .filter(m -> m.getUserId().equals(userId))
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Movimiento no encontrado"));
 
-        if (!existente.getUserId().equals(userId)) {
-            throw new BusinessException("El movimiento no pertenece al usuario");
+        // Validar que la categoría exista y pertenezca al usuario
+        var categoria = categoriaRepository.findByIdAndUserId(request.getCategoriaId(), userId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoría no encontrada"));
+
+        // Validar que el valor sea positivo
+        if (request.getValor().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException("El valor del movimiento debe ser mayor a cero");
         }
 
-        // Validar categoría si cambia
-        if (!request.getCategoriaId().equals(existente.getCategoriaId())) {
-            var categoria = categoriaRepository.findByIdAndUserId(request.getCategoriaId(), userId)
-                .orElseThrow(() -> new ResourceNotFoundException(
-                    "La categoría no existe o no pertenece al usuario"));
-
-            if (!request.getTipo().equals(categoria.getTipo().name())) {
-                throw new BusinessException(
-                    "El tipo de movimiento no coincide con el tipo de categoría");
-            }
-        }
-
-        // Validar valor según tipo
-        if ("INGRESO".equals(request.getTipo()) && request.getValor().compareTo(BigDecimal.ZERO) <= 0) {
-            throw new BusinessException("El valor de un ingreso debe ser positivo");
-        } else if ("EGRESO".equals(request.getTipo()) && request.getValor().compareTo(BigDecimal.ZERO) >= 0) {
-            throw new BusinessException("El valor de un egreso debe ser negativo");
+        // Validar consistencia entre tipo de movimiento y tipo de categoría
+        if (!categoria.getTipo().name().equals(request.getTipo())) {
+            throw new BusinessException("El tipo de movimiento no coincide con el tipo de categoría");
         }
 
         // Actualizar campos
@@ -190,9 +160,7 @@ public class MovimientoService {
 
         Movimiento actualizado = movimientoRepository.save(existente);
         
-        log.info("Movimiento actualizado exitosamente - ID: {} - Usuario: {}", 
-                actualizado.getId(), userId);
-        
+        log.info("Movimiento actualizado exitosamente - ID: {}", actualizado.getId());
         return mapToResponse(actualizado);
     }
 
@@ -201,40 +169,54 @@ public class MovimientoService {
      * 
      * @param id ID del movimiento a eliminar
      * @param userId ID del usuario autenticado
-     * @throws ResourceNotFoundException si el movimiento no existe
-     * @throws BusinessException si el movimiento no pertenece al usuario
      */
     public void eliminarMovimiento(UUID id, UUID userId) {
         log.info("Eliminando movimiento ID: {} para usuario: {}", id, userId);
 
         // Validar que el movimiento exista y pertenezca al usuario
         Movimiento existente = movimientoRepository.findById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("El movimiento no existe"));
-
-        if (!existente.getUserId().equals(userId)) {
-            throw new BusinessException("El movimiento no pertenece al usuario");
-        }
+            .filter(m -> m.getUserId().equals(userId))
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Movimiento no encontrado"));
 
         movimientoRepository.delete(existente);
         
-        log.info("Movimiento eliminado exitosamente - ID: {} - Usuario: {}", id, userId);
+        log.info("Movimiento eliminado exitosamente - ID: {}", id);
     }
 
     /**
-     * Convierte una entidad Movimiento a MovimientoResponse.
+     * Lista movimientos filtrados por categoría.
      * 
-     * @param movimiento Entidad a convertir
-     * @return DTO con los datos del movimiento
+     * @param categoriaId ID de la categoría
+     * @param userId ID del usuario autenticado
+     * @return Lista de movimientos de la categoría
+     */
+    @Transactional(readOnly = true)
+    public List<MovimientoResponse> listarMovimientosPorCategoria(UUID categoriaId, UUID userId) {
+        log.info("Listando movimientos por categoría: {} - Usuario: {}", categoriaId, userId);
+
+        // Validar que la categoría exista y pertenezca al usuario
+        categoriaRepository.findByIdAndUserId(categoriaId, userId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Categoría no encontrada"));
+
+        List<Movimiento> movimientos = movimientoRepository.findByUserIdAndCategoriaId(categoriaId, userId);
+        
+        return movimientos.stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Convierte entidad Movimiento a DTO MovimientoResponse.
      */
     private MovimientoResponse mapToResponse(Movimiento movimiento) {
-        return new MovimientoResponse(
-            movimiento.getId(),
-            movimiento.getCategoriaId(),
-            movimiento.getDescripcion(),
-            movimiento.getTipo().name(),
-            movimiento.getValor(),
-            movimiento.getFecha(),
-            movimiento.getCreatedAt()
-        );
+        MovimientoResponse response = new MovimientoResponse();
+        response.setId(movimiento.getId());
+        response.setCategoriaId(movimiento.getCategoriaId());
+        response.setDescripcion(movimiento.getDescripcion());
+        response.setTipo(movimiento.getTipo().name());
+        response.setValor(movimiento.getValor());
+        response.setFecha(movimiento.getFecha());
+        response.setCreatedAt(movimiento.getCreatedAt());
+        return response;
     }
-}
+} 

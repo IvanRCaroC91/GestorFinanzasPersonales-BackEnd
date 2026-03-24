@@ -3,7 +3,9 @@ package com.finanzas.finance.controller;
 import com.finanzas.finance.dto.ApiResponse;
 import com.finanzas.finance.dto.MovimientoRequest;
 import com.finanzas.finance.dto.MovimientoResponse;
+import com.finanzas.finance.entity.Movimiento;
 import com.finanzas.finance.service.MovimientoService;
+import com.finanzas.finance.repository.MovimientoRepository;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * Controller REST para gestión de movimientos financieros.
@@ -33,9 +36,11 @@ public class MovimientoController {
     private static final Logger log = LoggerFactory.getLogger(MovimientoController.class);
 
     private final MovimientoService movimientoService;
+    private final MovimientoRepository movimientoRepository;
 
-    public MovimientoController(MovimientoService movimientoService) {
+    public MovimientoController(MovimientoService movimientoService, MovimientoRepository movimientoRepository) {
         this.movimientoService = movimientoService;
+        this.movimientoRepository = movimientoRepository;
     }
 
     /**
@@ -103,7 +108,19 @@ public class MovimientoController {
         
         log.info("Request GET /api/v1/finance/movimientos?tipo={} - Usuario: {}", tipo, userId);
         
-        List<MovimientoResponse> movimientos = movimientoService.listarMovimientosPorTipo(userId, tipo);
+        List<MovimientoResponse> movimientos = movimientoRepository.findByUserIdAndTipo(
+                userId, Movimiento.TipoMovimiento.valueOf(tipo))
+                .stream()
+                .map(m -> new MovimientoResponse(
+                        m.getId(),
+                        m.getCategoriaId(),
+                        m.getDescripcion(),
+                        m.getTipo().name(),
+                        m.getValor(),
+                        m.getFecha(),
+                        m.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
         
         ApiResponse<List<MovimientoResponse>> apiResponse = ApiResponse.success(
             "Movimientos filtrados por tipo correctamente", movimientos);

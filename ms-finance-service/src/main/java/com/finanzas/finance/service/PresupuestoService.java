@@ -5,14 +5,15 @@ import com.finanzas.finance.dto.PresupuestoResponse;
 import com.finanzas.finance.dto.PresupuestoEjecucionResponse;
 import com.finanzas.finance.entity.Presupuesto;
 import com.finanzas.finance.entity.Categoria;
-import com.finanzas.finance.exception.ResourceNotFoundException;
 import com.finanzas.finance.exception.BusinessException;
 import com.finanzas.finance.repository.PresupuestoRepository;
 import com.finanzas.finance.repository.CategoriaRepository;
 import com.finanzas.finance.repository.MovimientoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
@@ -64,7 +65,7 @@ public class PresupuestoService {
 
         // Validar que la categoría exista y pertenezca al usuario
         Categoria categoria = categoriaRepository.findByIdAndUserId(request.getCategoriaId(), userId)
-            .orElseThrow(() -> new ResourceNotFoundException("La categoría no existe o no pertenece al usuario"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "La categoría no existe o no pertenece al usuario"));
 
         // Validar que la categoría sea de tipo EGRESO
         if (!categoria.getTipo().equals(Categoria.TipoMovimiento.EGRESO)) {
@@ -155,7 +156,7 @@ public class PresupuestoService {
         log.info("Buscando presupuesto ID: {} para usuario: {}", id, userId);
         
         Presupuesto presupuesto = presupuestoRepository.findByIdAndUserId(id, userId)
-            .orElseThrow(() -> new ResourceNotFoundException("El presupuesto no existe o no pertenece al usuario"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El presupuesto no existe o no pertenece al usuario"));
         
         return mapToResponse(presupuesto);
     }
@@ -175,12 +176,12 @@ public class PresupuestoService {
 
         // Validar que el presupuesto exista y pertenezca al usuario
         Presupuesto existente = presupuestoRepository.findByIdAndUserId(id, userId)
-            .orElseThrow(() -> new ResourceNotFoundException("El presupuesto no existe o no pertenece al usuario"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El presupuesto no existe o no pertenece al usuario"));
 
         // Si cambia la categoría, validar que exista y pertenezca al usuario
         if (!request.getCategoriaId().equals(existente.getCategoriaId())) {
             Categoria categoria = categoriaRepository.findByIdAndUserId(request.getCategoriaId(), userId)
-                .orElseThrow(() -> new ResourceNotFoundException("La categoría no existe o no pertenece al usuario"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "La categoría no existe o no pertenece al usuario"));
 
             if (!categoria.getTipo().equals(Categoria.TipoMovimiento.EGRESO)) {
                 throw new BusinessException("Solo se pueden asignar presupuestos a categorías de egresos");
@@ -229,7 +230,7 @@ public class PresupuestoService {
 
         // Validar que el presupuesto exista y pertenezca al usuario
         Presupuesto existente = presupuestoRepository.findByIdAndUserId(id, userId)
-            .orElseThrow(() -> new ResourceNotFoundException("El presupuesto no existe o no pertenece al usuario"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "El presupuesto no existe o no pertenece al usuario"));
 
         presupuestoRepository.delete(existente);
         
@@ -306,7 +307,7 @@ public class PresupuestoService {
 
         // Obtener el presupuesto específico
         Presupuesto presupuesto = presupuestoRepository.findByIdAndUserId(id, userId)
-            .orElseThrow(() -> new ResourceNotFoundException("Presupuesto no encontrado con ID: " + id));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Presupuesto no encontrado con ID: " + id));
 
         // Calcular el monto gastado en la categoría durante el período del presupuesto
         BigDecimal montoGastado = movimientoRepository.sumGastosByUsuarioAndCategoriaAndPeriodo(

@@ -9,7 +9,9 @@ import com.finanzas.finance.repository.CategoriaRepository;
 import com.finanzas.finance.repository.MovimientoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -55,7 +57,7 @@ public class CategoriaService {
         // Validar que no exista una categoría con el mismo nombre para el mismo usuario
         boolean existeNombre = categoriaRepository.existsByUserIdAndNombre(userId, request.getNombre());
         if (existeNombre) {
-            throw new BusinessException("Ya existe una categoría con ese nombre para este usuario");
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Ya existe una categoría con ese nombre para este usuario");
         }
 
         // Validar que el tipo sea válido
@@ -144,7 +146,7 @@ public class CategoriaService {
         log.info("Buscando categoría ID: {} para usuario: {}", id, userId);
         
         Categoria categoria = categoriaRepository.findByIdAndUserId(id, userId)
-            .orElseThrow(() -> new ResourceNotFoundException("La categoría no existe o no pertenece al usuario"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "La categoría no existe o no pertenece al usuario"));
         
         return mapToResponse(categoria);
     }
@@ -164,7 +166,7 @@ public class CategoriaService {
 
         // Validar que la categoría exista y pertenezca al usuario
         Categoria existente = categoriaRepository.findByIdAndUserId(id, userId)
-            .orElseThrow(() -> new ResourceNotFoundException("La categoría no existe o no pertenece al usuario"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "La categoría no existe o no pertenece al usuario"));
 
         // Validar que el nuevo nombre no esté en uso por otra categoría del mismo usuario
         if (!existente.getNombre().equals(request.getNombre())) {
@@ -217,7 +219,7 @@ public class CategoriaService {
 
         // Validar que la categoría exista y pertenezca al usuario
         Categoria existente = categoriaRepository.findByIdAndUserId(id, userId)
-            .orElseThrow(() -> new ResourceNotFoundException("La categoría no existe o no pertenece al usuario"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "La categoría no existe o no pertenece al usuario"));
 
         // Validar que no tenga movimientos asociados
         long countMovimientos = movimientoRepository.countByCategoriaIdAndUserId(id, userId);
