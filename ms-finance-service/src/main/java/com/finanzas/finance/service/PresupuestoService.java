@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -264,7 +265,7 @@ public class PresupuestoService {
                 if (presupuesto.getMontoLimite().compareTo(BigDecimal.ZERO) > 0) {
                     porcentajeEjecucion = montoGastado
                         .multiply(BigDecimal.valueOf(100))
-                        .divide(presupuesto.getMontoLimite(), 2, BigDecimal.ROUND_HALF_UP);
+                        .divide(presupuesto.getMontoLimite(), 2, RoundingMode.HALF_UP);
                 }
 
                 // Calcular monto disponible
@@ -282,6 +283,52 @@ public class PresupuestoService {
                     presupuesto.getMontoLimite(), montoGastado);
             })
             .collect(Collectors.toList());
+    }
+
+    /**
+     * Calcula la ejecución financiera de un presupuesto específico.
+     * 
+     * @param id ID del presupuesto a consultar
+     * @param userId ID del usuario autenticado
+     * @return PresupuestoEjecucionResponse con métricas de ejecución
+     */
+    @Transactional(readOnly = true)
+    public PresupuestoEjecucionResponse calcularEjecucionPresupuestoIndividual(UUID id, UUID userId) {
+        log.info("Calculando ejecución de presupuesto individual - ID: {} - Usuario: {}", id, userId);
+
+        // Obtener el presupuesto específico
+        Presupuesto presupuesto = presupuestoRepository.findByIdAndUserId(id, userId)
+            .orElseThrow(() -> new ResourceNotFoundException("Presupuesto no encontrado con ID: " + id));
+
+        // Calcular el monto gastado en la categoría durante el período del presupuesto
+        BigDecimal montoGastado = movimientoRepository.sumGastosByUsuarioAndCategoriaAndPeriodo(
+            userId, presupuesto.getCategoriaId(), presupuesto.getPeriodoInicio(), presupuesto.getPeriodoFin());
+
+        if (montoGastado == null) {
+            montoGastado = BigDecimal.ZERO;
+        }
+
+        // Calcular porcentaje de ejecución
+        BigDecimal porcentajeEjecucion = BigDecimal.ZERO;
+        if (presupuesto.getMontoLimite().compareTo(BigDecimal.ZERO) > 0) {
+            porcentajeEjecucion = montoGastado
+                .multiply(BigDecimal.valueOf(100))
+                .divide(presupuesto.getMontoLimite(), 2, RoundingMode.HALF_UP);
+        }
+
+        // Calcular disponible
+        BigDecimal disponible = presupuesto.getMontoLimite().subtract(montoGastado);
+
+        return new PresupuestoEjecucionResponse(
+            presupuesto.getId(),
+            presupuesto.getCategoriaId(),
+            presupuesto.getMontoLimite(),
+            montoGastado,
+            disponible,
+            porcentajeEjecucion,
+            presupuesto.getPeriodoInicio(),
+            presupuesto.getPeriodoFin()
+        );
     }
 
     /**

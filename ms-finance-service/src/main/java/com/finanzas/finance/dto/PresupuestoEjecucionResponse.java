@@ -1,6 +1,8 @@
 package com.finanzas.finance.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.UUID;
 
 /**
  * DTO Response para representar la ejecución financiera de un presupuesto.
@@ -9,50 +11,69 @@ import java.math.BigDecimal;
  * comparando el límite asignado contra los gastos reales del período.
  * 
  * Este DTO es CRÍTICO para el endpoint de ejecución financiera y contiene:
+ * - id: Identificador único del presupuesto
+ * - categoriaId: ID de la categoría asociada
  * - montoLimite: Límite máximo asignado al presupuesto
  * - totalGastado: Suma real de egresos en el período
  * - disponible: Saldo restante (montoLimite - totalGastado)
- * - porcentajeUsado: Porcentaje de utilización (totalGastado / montoLimite * 100)
- * 
- * Lógica de cálculo implementada en PresupuestoService:
- * 1. Obtiene presupuesto por ID y usuario
- * 2. Consulta movimientos WHERE:
- *    - tipo = 'EGRESO'
- *    - categoria_id = presupuesto.categoria_id  
- *    - fecha BETWEEN periodo_inicio AND periodo_fin
- *    - user_id = usuario autenticado
- * 3. Calcula métricas de ejecución
+ * - porcentajeEjecucion: Porcentaje de utilización (totalGastado / montoLimite * 100)
+ * - periodoInicio: Fecha de inicio del período
+ * - periodoFin: Fecha de fin del período
  * 
  * @author Sistema de Finanzas Personales
  * @version 1.0.0
  */
 public class PresupuestoEjecucionResponse {
 
+    private UUID id;
+    private UUID categoriaId;
     private BigDecimal montoLimite;
     private BigDecimal totalGastado;
     private BigDecimal disponible;
-    private BigDecimal porcentajeUsado;
+    private BigDecimal porcentajeEjecucion;
+    private LocalDate periodoInicio;
+    private LocalDate periodoFin;
 
     // Constructores
     public PresupuestoEjecucionResponse() {}
 
-    // Constructor de conveniencia para cálculos
-    public PresupuestoEjecucionResponse(BigDecimal montoLimite, BigDecimal totalGastado) {
+    // Constructor completo con 8 parámetros en orden exacto
+    public PresupuestoEjecucionResponse(
+            UUID id,
+            UUID categoriaId,
+            BigDecimal montoLimite,
+            BigDecimal totalGastado,
+            BigDecimal disponible,
+            BigDecimal porcentajeEjecucion,
+            LocalDate periodoInicio,
+            LocalDate periodoFin) {
+        this.id = id;
+        this.categoriaId = categoriaId;
         this.montoLimite = montoLimite;
         this.totalGastado = totalGastado;
-        this.disponible = montoLimite.subtract(totalGastado);
-        
-        // Calcular porcentaje usado con protección contra división por cero
-        if (montoLimite.compareTo(BigDecimal.ZERO) > 0) {
-            this.porcentajeUsado = totalGastado
-                .divide(montoLimite, 4, BigDecimal.ROUND_HALF_UP)
-                .multiply(new BigDecimal("100"));
-        } else {
-            this.porcentajeUsado = BigDecimal.ZERO;
-        }
+        this.disponible = disponible;
+        this.porcentajeEjecucion = porcentajeEjecucion;
+        this.periodoInicio = periodoInicio;
+        this.periodoFin = periodoFin;
     }
 
-    // Getters y Setters
+    // Getters
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
+    }
+
+    public UUID getCategoriaId() {
+        return categoriaId;
+    }
+
+    public void setCategoriaId(UUID categoriaId) {
+        this.categoriaId = categoriaId;
+    }
+
     public BigDecimal getMontoLimite() {
         return montoLimite;
     }
@@ -77,11 +98,27 @@ public class PresupuestoEjecucionResponse {
         this.disponible = disponible;
     }
 
-    public BigDecimal getPorcentajeUsado() {
-        return porcentajeUsado;
+    public BigDecimal getPorcentajeEjecucion() {
+        return porcentajeEjecucion;
     }
 
-    public void setPorcentajeUsado(BigDecimal porcentajeUsado) {
-        this.porcentajeUsado = porcentajeUsado;
+    public void setPorcentajeEjecucion(BigDecimal porcentajeEjecucion) {
+        this.porcentajeEjecucion = porcentajeEjecucion;
+    }
+
+    public LocalDate getPeriodoInicio() {
+        return periodoInicio;
+    }
+
+    public void setPeriodoInicio(LocalDate periodoInicio) {
+        this.periodoInicio = periodoInicio;
+    }
+
+    public LocalDate getPeriodoFin() {
+        return periodoFin;
+    }
+
+    public void setPeriodoFin(LocalDate periodoFin) {
+        this.periodoFin = periodoFin;
     }
 }

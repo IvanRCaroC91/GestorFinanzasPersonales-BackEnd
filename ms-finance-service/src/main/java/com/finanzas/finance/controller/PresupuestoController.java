@@ -191,12 +191,37 @@ public class PresupuestoController {
     }
 
     /**
+     * Obtiene la ejecución financiera de un presupuesto específico.
+     * 
+     * HTTP Method: GET
+     * Path: /api/v1/finance/presupuestos/{id}/ejecucion
+     * 
+     * @param id ID del presupuesto a consultar
+     * @param userId ID del usuario autenticado (header)
+     * @return PresupuestoEjecucionResponse con métricas de ejecución
+     */
+    @GetMapping("/{id}/ejecucion")
+    public ResponseEntity<ApiResponse<PresupuestoEjecucionResponse>> obtenerEjecucionPresupuesto(
+            @PathVariable UUID id,
+            @RequestHeader("X-User-Id") UUID userId) {
+        
+        log.info("Request GET /api/v1/finance/presupuestos/{}/ejecucion - Usuario: {}", id, userId);
+        
+        PresupuestoEjecucionResponse response = presupuestoService.calcularEjecucionPresupuestoIndividual(id, userId);
+        
+        ApiResponse<PresupuestoEjecucionResponse> apiResponse = ApiResponse.success(
+            "Ejecución de presupuesto obtenida correctamente", response);
+        
+        return ResponseEntity.ok(apiResponse);
+    }
+
+    /**
      * Obtiene la ejecución financiera de los presupuestos del usuario para un mes específico.
      * 
      * HTTP Method: GET
-     * Path: /api/v1/finance/presupuestos/ejecucion?mesAnio={mesAnio}
+     * Path: /api/v1/finance/presupuestos/ejecucion?periodoInicio={periodoInicio}
      * 
-     * @param mesAnio Mes y año en formato YYYY-MM
+     * @param periodoInicio Período en formato LocalDate
      * @param userId ID del usuario autenticado (header)
      * @return Lista con la ejecución de los presupuestos
      */
