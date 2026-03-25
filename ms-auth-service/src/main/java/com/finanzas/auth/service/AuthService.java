@@ -60,13 +60,14 @@ public class AuthService {
                 return new LoginResponse("Credenciales inválidas", false, null, null);
             }
 
-            // Generar token JWT
-            String token = jwtUtil.generateToken(username);
+            // Generar token JWT con userId
+            String token = jwtUtil.generateToken(username, user.getId().toString());
             
-            // Construir respuesta con datos del usuario
+            // Construir respuesta con datos del usuario incluyendo userId
             LoginResponse response = new LoginResponse(
                 "Login exitoso", 
                 true, 
+                user.getId().toString(),    // ← userId UUID
                 user.getUsername(),
                 user.getEmail(),
                 user.getNombreCompleto(),

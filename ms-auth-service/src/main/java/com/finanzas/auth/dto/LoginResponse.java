@@ -7,6 +7,7 @@ public class LoginResponse {
     
     private String message;
     private boolean success;
+    private String userId;
     private String username;
     private String email;
     private String nombreCompleto;
@@ -14,6 +15,20 @@ public class LoginResponse {
     private String token;
 
     public LoginResponse() {}
+
+    public LoginResponse(String message, boolean success, String userId, 
+                       String username, String email, 
+                       String nombreCompleto, String iniciales, 
+                       String token) {
+        this.message = message;
+        this.success = success;
+        this.userId = userId;
+        this.username = username;
+        this.email = email;
+        this.nombreCompleto = nombreCompleto;
+        this.iniciales = iniciales;
+        this.token = token;
+    }
 
     public LoginResponse(String message, boolean success, String username) {
         this.message = message;
@@ -54,6 +69,14 @@ public class LoginResponse {
 
     public void setSuccess(boolean success) {
         this.success = success;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
     }
 
     public String getUsername() {

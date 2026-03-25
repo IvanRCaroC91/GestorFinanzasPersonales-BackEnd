@@ -48,10 +48,15 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         
         try {
             if (validateToken(token)) {
+                // Extraer userId y username del JWT
+                String userId = extractUserId(token);
+                String username = extractUsername(token);
+                
                 // Agregar información del usuario al request
                 return chain.filter(exchange.mutate()
                         .request(exchange.getRequest().mutate()
-                                .header("X-User-Username", extractUsername(token))
+                                .header("X-User-Id", userId)           // ← CLAVE: UUID del usuario
+                                .header("X-User-Username", username)   // ← Username adicional
                                 .build())
                         .build());
             } else {
@@ -88,6 +93,16 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 .parseSignedClaims(token)
                 .getPayload();
         return claims.getSubject();
+    }
+
+    private String extractUserId(String token) {
+        SecretKey signingKey = Keys.hmacShaKeyFor(secret.getBytes());
+        Claims claims = Jwts.parser()
+                .verifyWith(signingKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+        return claims.get("userId", String.class);
     }
 
     private Mono<Void> handleUnauthorized(ServerWebExchange exchange) {
