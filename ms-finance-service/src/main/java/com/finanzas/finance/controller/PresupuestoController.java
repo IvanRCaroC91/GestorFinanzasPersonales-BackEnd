@@ -90,26 +90,28 @@ public class PresupuestoController {
     }
 
     /**
-     * Lista presupuestos del usuario filtrados por mes/año.
+     * Lista presupuestos del usuario filtrados por año y mes.
      * 
      * HTTP Method: GET
-     * Path: /api/v1/finance/presupuestos?mesAnio={mesAnio}
+     * Path: /api/v1/finance/presupuestos?anio={anio}&mes={mes}
      * 
-     * @param mesAnio Mes y año en formato YYYY-MM
+     * @param anio Año del presupuesto
+     * @param mes Mes del presupuesto (1-12)
      * @param userId ID del usuario autenticado (header)
-     * @return Lista de presupuestos filtrados por mes/año
+     * @return Lista de presupuestos filtrados por año y mes
      */
-    @GetMapping(params = "periodoInicio")
+    @GetMapping(params = {"anio", "mes"})
     public ResponseEntity<ApiResponse<List<PresupuestoResponse>>> listarPresupuestosPorPeriodo(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodoInicio,
+            @RequestParam Integer anio,
+            @RequestParam Integer mes,
             @RequestHeader("X-User-Id") UUID userId) {
         
-        log.info("Request GET /api/v1/finance/presupuestos?periodoInicio={} - Usuario: {}", periodoInicio, userId);
+        log.info("Request GET /api/v1/finance/presupuestos?anio={}&mes={} - Usuario: {}", anio, mes, userId);
         
-        List<PresupuestoResponse> presupuestos = presupuestoService.listarPresupuestosPorPeriodo(userId, periodoInicio);
+        List<PresupuestoResponse> presupuestos = presupuestoService.listarPresupuestosPorPeriodo(userId, anio, mes);
         
         ApiResponse<List<PresupuestoResponse>> apiResponse = ApiResponse.success(
-            "Presupuestos filtrados por período correctamente", presupuestos);
+            "Presupuestos filtrados por año y mes correctamente", presupuestos);
         
         return ResponseEntity.ok(apiResponse);
     }
@@ -216,23 +218,25 @@ public class PresupuestoController {
     }
 
     /**
-     * Obtiene la ejecución financiera de los presupuestos del usuario para un mes específico.
+     * Obtiene la ejecución financiera de los presupuestos del usuario para un año y mes específicos.
      * 
      * HTTP Method: GET
-     * Path: /api/v1/finance/presupuestos/ejecucion?periodoInicio={periodoInicio}
+     * Path: /api/v1/finance/presupuestos/ejecucion?anio={anio}&mes={mes}
      * 
-     * @param periodoInicio Período en formato LocalDate
+     * @param anio Año del presupuesto
+     * @param mes Mes del presupuesto (1-12)
      * @param userId ID del usuario autenticado (header)
      * @return Lista con la ejecución de los presupuestos
      */
     @GetMapping("/ejecucion")
     public ResponseEntity<ApiResponse<List<PresupuestoEjecucionResponse>>> obtenerEjecucionPresupuestos(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate periodoInicio,
+            @RequestParam Integer anio,
+            @RequestParam Integer mes,
             @RequestHeader("X-User-Id") UUID userId) {
         
-        log.info("Request GET /api/v1/finance/presupuestos/ejecucion?periodoInicio={} - Usuario: {}", periodoInicio, userId);
+        log.info("Request GET /api/v1/finance/presupuestos/ejecucion?anio={}&mes={} - Usuario: {}", anio, mes, userId);
         
-        List<PresupuestoEjecucionResponse> ejecuciones = presupuestoService.obtenerEjecucionPresupuestos(userId, periodoInicio);
+        List<PresupuestoEjecucionResponse> ejecuciones = presupuestoService.obtenerEjecucionPresupuestos(userId, anio, mes);
         
         ApiResponse<List<PresupuestoEjecucionResponse>> apiResponse = ApiResponse.success(
             "Ejecución de presupuestos obtenida correctamente", ejecuciones);

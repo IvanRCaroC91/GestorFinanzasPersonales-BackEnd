@@ -54,8 +54,8 @@ CREATE TABLE presupuestos (
     user_id UUID NOT NULL,
     categoria_id UUID NOT NULL,
     monto_limite NUMERIC(12,2) NOT NULL CHECK (monto_limite >= 0),
-    periodo_inicio DATE NOT NULL,
-    periodo_fin DATE NOT NULL,
+    anio INT NOT NULL CHECK (anio >= 2000 AND anio <= 2100),
+    mes INT NOT NULL CHECK (mes >= 1 AND mes <= 12),
     created_at TIMESTAMP DEFAULT NOW(),
     CONSTRAINT fk_presupuesto_usuario
         FOREIGN KEY (user_id)
@@ -65,10 +65,8 @@ CREATE TABLE presupuestos (
         FOREIGN KEY (categoria_id)
         REFERENCES categorias(id)
         ON DELETE CASCADE,
-    CONSTRAINT presupuestos_usuario_categoria_periodo_unique
-        UNIQUE (user_id, categoria_id, periodo_inicio, periodo_fin),
-    CONSTRAINT chk_presupuesto_fechas
-        CHECK (periodo_inicio < periodo_fin)
+    CONSTRAINT presupuestos_usuario_categoria_mes_anio_unique
+        UNIQUE (user_id, categoria_id, anio, mes)
 );
 
 -- =========================

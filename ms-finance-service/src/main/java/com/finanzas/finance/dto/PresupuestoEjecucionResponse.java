@@ -1,7 +1,6 @@
 package com.finanzas.finance.dto;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.UUID;
 
 /**
@@ -17,8 +16,8 @@ import java.util.UUID;
  * - totalGastado: Suma real de egresos en el período
  * - disponible: Saldo restante (montoLimite - totalGastado)
  * - porcentajeEjecucion: Porcentaje de utilización (totalGastado / montoLimite * 100)
- * - periodoInicio: Fecha de inicio del período
- * - periodoFin: Fecha de fin del período
+ * - anio: Año del presupuesto
+ * - mes: Mes del presupuesto
  * 
  * @author Sistema de Finanzas Personales
  * @version 1.0.0
@@ -31,8 +30,8 @@ public class PresupuestoEjecucionResponse {
     private BigDecimal totalGastado;
     private BigDecimal disponible;
     private BigDecimal porcentajeEjecucion;
-    private LocalDate periodoInicio;
-    private LocalDate periodoFin;
+    private Integer anio;
+    private Integer mes;
 
     // Constructores
     public PresupuestoEjecucionResponse() {}
@@ -45,16 +44,16 @@ public class PresupuestoEjecucionResponse {
             BigDecimal totalGastado,
             BigDecimal disponible,
             BigDecimal porcentajeEjecucion,
-            LocalDate periodoInicio,
-            LocalDate periodoFin) {
+            Integer anio,
+            Integer mes) {
         this.id = id;
         this.categoriaId = categoriaId;
         this.montoLimite = montoLimite;
         this.totalGastado = totalGastado;
         this.disponible = disponible;
         this.porcentajeEjecucion = porcentajeEjecucion;
-        this.periodoInicio = periodoInicio;
-        this.periodoFin = periodoFin;
+        this.anio = anio;
+        this.mes = mes;
     }
 
     // Getters
@@ -106,19 +105,19 @@ public class PresupuestoEjecucionResponse {
         this.porcentajeEjecucion = porcentajeEjecucion;
     }
 
-    public LocalDate getPeriodoInicio() {
-        return periodoInicio;
+    public Integer getAnio() {
+        return anio;
     }
 
-    public void setPeriodoInicio(LocalDate periodoInicio) {
-        this.periodoInicio = periodoInicio;
+    public void setAnio(Integer anio) {
+        this.anio = anio;
     }
 
-    public LocalDate getPeriodoFin() {
-        return periodoFin;
+    public Integer getMes() {
+        return mes;
     }
 
-    public void setPeriodoFin(LocalDate periodoFin) {
-        this.periodoFin = periodoFin;
+    public void setMes(Integer mes) {
+        this.mes = mes;
     }
 }

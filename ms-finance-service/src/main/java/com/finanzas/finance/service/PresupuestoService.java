@@ -60,8 +60,8 @@ public class PresupuestoService {
      * @throws ResourceNotFoundException si la categoría no existe
      */
     public PresupuestoResponse crearPresupuesto(PresupuestoRequest request, UUID userId) {
-        log.info("Creando presupuesto para usuario: {} - Categoría: {} - Período: {}", 
-                userId, request.getCategoriaId(), request.getPeriodoInicio());
+        log.info("Creando presupuesto para usuario: {} - Categoría: {} - Año: {} - Mes: {}", 
+                userId, request.getCategoriaId(), request.getAnio(), request.getMes());
 
         // Validar que la categoría exista y pertenezca al usuario
         Categoria categoria = categoriaRepository.findByIdAndUserId(request.getCategoriaId(), userId)
@@ -72,9 +72,9 @@ public class PresupuestoService {
             throw new BusinessException("Solo se pueden crear presupuestos para categorías de egresos");
         }
 
-        // Validar que no exista un presupuesto para la misma categoría y período
-        boolean existePresupuesto = presupuestoRepository.existsByCategoriaIdAndPeriodoInicioAndUserId(
-            request.getCategoriaId(), request.getPeriodoInicio(), userId);
+        // Validar que no exista un presupuesto para la misma categoría, año y mes
+        boolean existePresupuesto = presupuestoRepository.existsByUserIdAndCategoriaIdAndAnioAndMes(
+            userId, request.getCategoriaId(), request.getAnio(), request.getMes());
         if (existePresupuesto) {
             throw new BusinessException("Ya existe un presupuesto para esta categoría en el mismo período");
         }
@@ -89,8 +89,8 @@ public class PresupuestoService {
         presupuesto.setUserId(userId);
         presupuesto.setCategoriaId(request.getCategoriaId());
         presupuesto.setMontoLimite(request.getMontoLimite());
-        presupuesto.setPeriodoInicio(request.getPeriodoInicio());
-        presupuesto.setPeriodoFin(request.getPeriodoFin());
+        presupuesto.setAnio(request.getAnio());
+        presupuesto.setMes(request.getMes());
 
         // Guardar
         Presupuesto guardado = presupuestoRepository.save(presupuesto);
@@ -111,7 +111,7 @@ public class PresupuestoService {
     public List<PresupuestoResponse> listarPresupuestosPorUsuario(UUID userId) {
         log.info("Listando presupuestos para usuario: {}", userId);
         
-        List<Presupuesto> presupuestos = presupuestoRepository.findByUserIdOrderByPeriodoInicioDescCategoriaIdAsc(userId);
+        List<Presupuesto> presupuestos = presupuestoRepository.findByUserIdOrderByAnioDescMesDescCategoriaIdAsc(userId);
         
         List<PresupuestoResponse> responses = presupuestos.stream()
             .map(this::mapToResponse)
@@ -122,24 +122,24 @@ public class PresupuestoService {
     }
 
     /**
-     * Lista presupuestos del usuario filtrados por período.
+     * Lista presupuestos del usuario filtrados por año y mes.
      * 
      * @param userId ID del usuario autenticado
-     * @param periodoInicio Período en formato LocalDate
-     * @return Lista de presupuestos filtrados por período
+     * @param anio Año del presupuesto
+     * @param mes Mes del presupuesto
+     * @return Lista de presupuestos filtrados por año y mes
      */
     @Transactional(readOnly = true)
-    public List<PresupuestoResponse> listarPresupuestosPorPeriodo(UUID userId, LocalDate periodoInicio) {
-        log.info("Listando presupuestos por período: {} para usuario: {}", periodoInicio, userId);
+    public List<PresupuestoResponse> listarPresupuestosPorPeriodo(UUID userId, Integer anio, Integer mes) {
+        log.info("Listando presupuestos para usuario: {} - Año: {} - Mes: {}", userId, anio, mes);
         
-        List<Presupuesto> presupuestos = presupuestoRepository.findByUserIdAndPeriodoInicioOrderByCategoriaIdAsc(userId, periodoInicio);
+        List<Presupuesto> presupuestos = presupuestoRepository.findByUserIdAndAnioAndMesOrderByCategoriaIdAsc(userId, anio, mes);
         
         List<PresupuestoResponse> responses = presupuestos.stream()
             .map(this::mapToResponse)
             .collect(Collectors.toList());
             
-        log.info("Se encontraron {} presupuestos para el período {} del usuario: {}", 
-                responses.size(), periodoInicio, userId);
+        log.info("Se encontraron {} presupuestos para usuario: {} - Año: {} - Mes: {}", responses.size(), userId, anio, mes);
         return responses;
     }
 
@@ -188,12 +188,13 @@ public class PresupuestoService {
             }
         }
 
-        // Si cambia el período, validar que no exista otro presupuesto para la misma categoría y período
-        if (!request.getPeriodoInicio().equals(existente.getPeriodoInicio()) || 
+        // Si cambia el año o mes, validar que no exista otro presupuesto para la misma categoría, año y mes
+        if (!request.getAnio().equals(existente.getAnio()) || 
+            !request.getMes().equals(existente.getMes()) ||
             !request.getCategoriaId().equals(existente.getCategoriaId())) {
             
-            boolean existePresupuesto = presupuestoRepository.existsByCategoriaIdAndPeriodoInicioAndUserIdAndIdNot(
-                request.getCategoriaId(), request.getPeriodoInicio(), userId, id);
+            boolean existePresupuesto = presupuestoRepository.existsByUserIdAndCategoriaIdAndAnioAndMesAndIdNot(
+                userId, request.getCategoriaId(), request.getAnio(), request.getMes(), id);
             if (existePresupuesto) {
                 throw new BusinessException("Ya existe un presupuesto para esta categoría en el mismo período");
             }
@@ -207,8 +208,8 @@ public class PresupuestoService {
         // Actualizar campos
         existente.setCategoriaId(request.getCategoriaId());
         existente.setMontoLimite(request.getMontoLimite());
-        existente.setPeriodoInicio(request.getPeriodoInicio());
-        existente.setPeriodoFin(request.getPeriodoFin());
+        existente.setAnio(request.getAnio());
+        existente.setMes(request.getMes());
 
         Presupuesto actualizado = presupuestoRepository.save(existente);
         
@@ -238,24 +239,25 @@ public class PresupuestoService {
     }
 
     /**
-     * Obtiene la ejecución financiera de los presupuestos de un usuario para un período específico.
+     * Obtiene la ejecución financiera de los presupuestos de un usuario para un año y mes específicos.
      * 
      * @param userId ID del usuario autenticado
-     * @param periodoInicio Período en formato LocalDate
+     * @param anio Año del presupuesto
+     * @param mes Mes del presupuesto
      * @return Lista con la ejecución de los presupuestos
      */
     @Transactional(readOnly = true)
-    public List<PresupuestoEjecucionResponse> obtenerEjecucionPresupuestos(UUID userId, LocalDate periodoInicio) {
-        log.info("Obteniendo ejecución de presupuestos - Usuario: {} - Período: {}", userId, periodoInicio);
+    public List<PresupuestoEjecucionResponse> obtenerEjecucionPresupuestos(UUID userId, Integer anio, Integer mes) {
+        log.info("Obteniendo ejecución de presupuestos - Usuario: {} - Año: {} - Mes: {}", userId, anio, mes);
 
-        // Obtener todos los presupuestos del usuario para el período
-        List<Presupuesto> presupuestos = presupuestoRepository.findByUserIdAndPeriodoInicioOrderByCategoriaIdAsc(userId, periodoInicio);
+        // Obtener todos los presupuestos del usuario para el año y mes
+        List<Presupuesto> presupuestos = presupuestoRepository.findByUserIdAndAnioAndMesOrderByCategoriaIdAsc(userId, anio, mes);
 
         return presupuestos.stream()
             .map(presupuesto -> {
-                // Calcular el monto gastado en la categoría durante el período
-                BigDecimal montoGastado = movimientoRepository.sumGastosByUsuarioAndCategoriaAndPeriodo(
-                    userId, presupuesto.getCategoriaId(), presupuesto.getPeriodoInicio(), presupuesto.getPeriodoFin());
+                // Calcular el monto gastado en la categoría durante el año y mes
+                BigDecimal montoGastado = movimientoRepository.sumValorByCategoriaIdAndUserIdAndAnioAndMes(
+                    userId, presupuesto.getCategoriaId(), presupuesto.getAnio(), presupuesto.getMes());
                 
                 if (montoGastado == null) {
                     montoGastado = BigDecimal.ZERO;
@@ -287,8 +289,8 @@ public class PresupuestoService {
                     montoGastado,
                     montoDisponible,
                     porcentajeEjecucion,
-                    presupuesto.getPeriodoInicio(),
-                    presupuesto.getPeriodoFin()
+                    presupuesto.getAnio(),
+                    presupuesto.getMes()
                 );
             })
             .collect(Collectors.toList());
@@ -309,9 +311,9 @@ public class PresupuestoService {
         Presupuesto presupuesto = presupuestoRepository.findByIdAndUserId(id, userId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Presupuesto no encontrado con ID: " + id));
 
-        // Calcular el monto gastado en la categoría durante el período del presupuesto
-        BigDecimal montoGastado = movimientoRepository.sumGastosByUsuarioAndCategoriaAndPeriodo(
-            userId, presupuesto.getCategoriaId(), presupuesto.getPeriodoInicio(), presupuesto.getPeriodoFin());
+        // Calcular el monto gastado en la categoría durante el año y mes
+        BigDecimal montoGastado = movimientoRepository.sumValorByCategoriaIdAndUserIdAndAnioAndMes(
+            userId, presupuesto.getCategoriaId(), presupuesto.getAnio(), presupuesto.getMes());
 
         if (montoGastado == null) {
             montoGastado = BigDecimal.ZERO;
@@ -335,8 +337,8 @@ public class PresupuestoService {
             montoGastado,
             disponible,
             porcentajeEjecucion,
-            presupuesto.getPeriodoInicio(),
-            presupuesto.getPeriodoFin()
+            presupuesto.getAnio(),
+            presupuesto.getMes()
         );
     }
 
@@ -351,8 +353,8 @@ public class PresupuestoService {
             presupuesto.getId(),
             presupuesto.getCategoriaId(),
             presupuesto.getMontoLimite(),
-            presupuesto.getPeriodoInicio(),
-            presupuesto.getPeriodoFin()
+            presupuesto.getAnio(),
+            presupuesto.getMes()
         );
     }
 }

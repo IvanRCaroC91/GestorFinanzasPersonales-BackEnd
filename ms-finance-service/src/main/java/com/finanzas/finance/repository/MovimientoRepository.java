@@ -92,15 +92,17 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, UUID> {
     long countByCategoriaIdAndUserId(UUID categoriaId, UUID userId);
 
     /**
-     * Suma valores de movimientos por categoría, usuario y mes/año.
+     * Suma valores de movimientos por categoría, usuario, año y mes.
      */
     @Query("SELECT COALESCE(SUM(m.valor), 0) " +
            "FROM Movimiento m " +
            "WHERE m.categoriaId = :categoriaId " +
            "AND m.userId = :userId " +
-           "AND DATE_FORMAT(m.fecha, 'YYYY-MM') = :mesAnio")
-    BigDecimal sumValorByCategoriaIdAndUserIdAndMesAnio(
+           "AND YEAR(m.fecha) = :anio " +
+           "AND MONTH(m.fecha) = :mes")
+    BigDecimal sumValorByCategoriaIdAndUserIdAndAnioAndMes(
             @Param("categoriaId") UUID categoriaId,
             @Param("userId") UUID userId,
-            @Param("mesAnio") String mesAnio);
+            @Param("anio") Integer anio,
+            @Param("mes") Integer mes);
 }

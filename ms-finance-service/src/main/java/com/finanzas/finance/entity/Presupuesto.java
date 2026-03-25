@@ -3,9 +3,9 @@ package com.finanzas.finance.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -17,11 +17,11 @@ import java.util.UUID;
  * - user_id: FK a usuarios.id
  * - categoria_id: FK a categorias.id
  * - monto_limite: NUMERIC(12,2) con CHECK >= 0
- * - periodo_inicio: DATE (inicio del período presupuestario)
- * - periodo_fin: DATE (fin del período presupuestario)
+ * - anio: INT (año del presupuesto, 2000-2100)
+ * - mes: INT (mes del presupuesto, 1-12)
  * - created_at: TIMESTAMP
  * 
- * Restricción única: (user_id, categoria_id, periodo_inicio, periodo_fin)
+ * Restricción única: (user_id, categoria_id, anio, mes)
  * 
  * @author Sistema de Finanzas Personales
  * @version 1.0.0
@@ -30,8 +30,8 @@ import java.util.UUID;
 @Table(name = "presupuestos", 
        uniqueConstraints = {
            @UniqueConstraint(
-               name = "presupuestos_usuario_categoria_periodo_unique",
-               columnNames = {"user_id", "categoria_id", "periodo_inicio", "periodo_fin"}
+               name = "presupuestos_usuario_categoria_mes_anio_unique",
+               columnNames = {"user_id", "categoria_id", "anio", "mes"}
            )
        })
 public class Presupuesto {
@@ -52,14 +52,17 @@ public class Presupuesto {
     @Column(name = "monto_limite", nullable = false, precision = 12, scale = 2)
     private BigDecimal montoLimite;
 
-    @NotNull(message = "La fecha de inicio del período es obligatoria")
-    @Column(name = "periodo_inicio", nullable = false)
-    private LocalDate periodoInicio;
+    @NotNull(message = "El año es obligatorio")
+    @Min(value = 2000, message = "El año debe ser mayor o igual a 2000")
+    @Max(value = 2100, message = "El año debe ser menor o igual a 2100")
+    @Column(name = "anio", nullable = false)
+    private Integer anio;
 
-    @NotNull(message = "La fecha de fin del período es obligatoria")
-    @FutureOrPresent(message = "La fecha de fin del período debe ser presente o futura")
-    @Column(name = "periodo_fin", nullable = false)
-    private LocalDate periodoFin;
+    @NotNull(message = "El mes es obligatorio")
+    @Min(value = 1, message = "El mes debe estar entre 1 y 12")
+    @Max(value = 12, message = "El mes debe estar entre 1 y 12")
+    @Column(name = "mes", nullable = false)
+    private Integer mes;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -102,20 +105,20 @@ public class Presupuesto {
         this.montoLimite = montoLimite;
     }
 
-    public LocalDate getPeriodoInicio() {
-        return periodoInicio;
+    public Integer getAnio() {
+        return anio;
     }
 
-    public void setPeriodoInicio(LocalDate periodoInicio) {
-        this.periodoInicio = periodoInicio;
+    public void setAnio(Integer anio) {
+        this.anio = anio;
     }
 
-    public LocalDate getPeriodoFin() {
-        return periodoFin;
+    public Integer getMes() {
+        return mes;
     }
 
-    public void setPeriodoFin(LocalDate periodoFin) {
-        this.periodoFin = periodoFin;
+    public void setMes(Integer mes) {
+        this.mes = mes;
     }
 
     public LocalDateTime getCreatedAt() {

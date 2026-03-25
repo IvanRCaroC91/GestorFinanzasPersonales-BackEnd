@@ -54,6 +54,29 @@ INSERT INTO movimientos (user_id, categoria_id, factura_id, descripcion, tipo, v
  NULL, 'Supermercado', 'EGRESO', 300000.00, '2026-01-08', NOW());
 
 -- =========================
+-- PRESUPUESTOS DE EJEMPLO
+-- =========================
+INSERT INTO presupuestos (user_id, categoria_id, monto_limite, anio, mes) VALUES
+-- Presupuestos para admin (mes de marzo 2026)
+((SELECT id FROM usuarios WHERE username = 'admin'), 
+ (SELECT id FROM categorias WHERE user_id = (SELECT id FROM usuarios WHERE username = 'admin') AND nombre = 'Alquiler'), 
+ 900000.00, 2026, 3),
+((SELECT id FROM usuarios WHERE username = 'admin'), 
+ (SELECT id FROM categorias WHERE user_id = (SELECT id FROM usuarios WHERE username = 'admin') AND nombre = 'Supermercado'), 
+ 500000.00, 2026, 3),
+((SELECT id FROM usuarios WHERE username = 'admin'), 
+ (SELECT id FROM categorias WHERE user_id = (SELECT id FROM usuarios WHERE username = 'admin') AND nombre = 'Transporte'), 
+ 200000.00, 2026, 3),
+
+-- Presupuestos para user (mes de marzo 2026)
+((SELECT id FROM usuarios WHERE username = 'user'), 
+ (SELECT id FROM categorias WHERE user_id = (SELECT id FROM usuarios WHERE username = 'user') AND nombre = 'Comida'), 
+ 400000.00, 2026, 3),
+((SELECT id FROM usuarios WHERE username = 'user'), 
+ (SELECT id FROM categorias WHERE user_id = (SELECT id FROM usuarios WHERE username = 'user') AND nombre = 'Facturas'), 
+ 300000.00, 2026, 3);
+
+-- =========================
 -- COMENTARIOS DE USO
 -- =========================
 /*
@@ -65,6 +88,7 @@ ESTRUCTURA:
 - 2 usuarios con datos completos
 - 10 categorías (5 por usuario)
 - 5 movimientos de ejemplo
+- 5 presupuestos mensuales de ejemplo
 
 PARA USAR:
 1. Ejecutar init.sql primero (crea estructura)
