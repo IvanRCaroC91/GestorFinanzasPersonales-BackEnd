@@ -2,9 +2,9 @@ package com.finanzas.finance.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Max;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.UUID;
 
 /**
@@ -16,14 +16,15 @@ import java.util.UUID;
  * Campos según la tabla presupuestos:
  * - categoria_id: FK a categorias.id
  * - monto_limite: NUMERIC(12,2) NOT NULL CHECK (monto_limite >= 0)
- * - periodo_inicio: DATE NOT NULL
- * - periodo_fin: DATE NOT NULL
+ * - anio: INT NOT NULL (2000-2100)
+ * - mes: INT NOT NULL (1-12)
  * 
  * Validaciones críticas implementadas:
- * - periodo_inicio < periodo_fin (validado en BD con constraint)
+ * - anio entre 2000 y 2100
+ * - mes entre 1 y 12
  * - monto_limite >= 0 (validado en BD y aquí)
  * - categoría pertenece al usuario (validado en service)
- * - sin solapamiento de períodos (validado en service)
+ * - sin duplicados por (user, categoria, mes, anio) (validado en service)
  * 
  * user_id se gestiona internamente para mantener seguridad de datos.
  * 
@@ -39,12 +40,15 @@ public class PresupuestoRequest {
     @DecimalMin(value = "0.01", message = "El monto límite debe ser mayor a cero")
     private BigDecimal montoLimite;
 
-    @NotNull(message = "La fecha de inicio del período es obligatoria")
-    private LocalDate periodoInicio;
+    @NotNull(message = "El año es obligatorio")
+    @Min(value = 2000, message = "El año debe ser mayor o igual a 2000")
+    @Max(value = 2100, message = "El año debe ser menor o igual a 2100")
+    private Integer anio;
 
-    @NotNull(message = "La fecha de fin del período es obligatoria")
-    @FutureOrPresent(message = "La fecha de fin debe ser presente o futura")
-    private LocalDate periodoFin;
+    @NotNull(message = "El mes es obligatorio")
+    @Min(value = 1, message = "El mes debe estar entre 1 y 12")
+    @Max(value = 12, message = "El mes debe estar entre 1 y 12")
+    private Integer mes;
 
     // Constructores
     public PresupuestoRequest() {}
@@ -66,19 +70,19 @@ public class PresupuestoRequest {
         this.montoLimite = montoLimite;
     }
 
-    public LocalDate getPeriodoInicio() {
-        return periodoInicio;
+    public Integer getAnio() {
+        return anio;
     }
 
-    public void setPeriodoInicio(LocalDate periodoInicio) {
-        this.periodoInicio = periodoInicio;
+    public void setAnio(Integer anio) {
+        this.anio = anio;
     }
 
-    public LocalDate getPeriodoFin() {
-        return periodoFin;
+    public Integer getMes() {
+        return mes;
     }
 
-    public void setPeriodoFin(LocalDate periodoFin) {
-        this.periodoFin = periodoFin;
+    public void setMes(Integer mes) {
+        this.mes = mes;
     }
 }

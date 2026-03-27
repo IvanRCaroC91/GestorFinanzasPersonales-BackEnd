@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -35,46 +34,38 @@ public interface PresupuestoRepository extends JpaRepository<Presupuesto, UUID> 
     List<Presupuesto> findByUserIdAndCategoriaId(UUID userId, UUID categoriaId);
 
     /**
-     * Busca presupuestos activos de un usuario en una fecha específica.
-     * Un presupuesto está activo si la fecha está dentro del período.
+     * Busca presupuestos de un usuario por año y mes.
      */
-    @Query("SELECT p FROM Presupuesto p " +
-           "WHERE p.userId = :userId " +
-           "AND :fecha BETWEEN p.periodoInicio AND p.periodoFin")
-    List<Presupuesto> findActivosByUsuarioAndFecha(
-            @Param("userId") UUID userId, 
-            @Param("fecha") LocalDate fecha);
+    List<Presupuesto> findByUserIdAndAnioAndMes(UUID userId, Integer anio, Integer mes);
 
     /**
-     * Busca presupuestos de un usuario en un rango de fechas.
+     * Busca presupuestos de un usuario por año.
      */
-    @Query("SELECT p FROM Presupuesto p " +
-           "WHERE p.userId = :userId " +
-           "AND p.periodoInicio <= :fechaFin " +
-           "AND p.periodoFin >= :fechaInicio")
-    List<Presupuesto> findByUsuarioAndRangoFechas(
-            @Param("userId") UUID userId,
-            @Param("fechaInicio") LocalDate fechaInicio,
-            @Param("fechaFin") LocalDate fechaFin);
+    List<Presupuesto> findByUserIdAndAnio(UUID userId, Integer anio);
 
     /**
-     * Busca presupuestos de un usuario por categoría y período.
+     * Busca presupuestos de un usuario por año y mes ordenados por categoría.
      */
-    List<Presupuesto> findByUserIdAndCategoriaIdAndPeriodoInicioAndPeriodoFin(
+    List<Presupuesto> findByUserIdAndAnioAndMesOrderByCategoriaIdAsc(UUID userId, Integer anio, Integer mes);
+
+    /**
+     * Busca presupuestos de un usuario por categoría, año y mes.
+     */
+    List<Presupuesto> findByUserIdAndCategoriaIdAndAnioAndMes(
             UUID userId, 
             UUID categoriaId, 
-            LocalDate periodoInicio, 
-            LocalDate periodoFin);
+            Integer anio, 
+            Integer mes);
 
     /**
-     * Verifica si existe un presupuesto para el mismo usuario, categoría y período.
+     * Verifica si existe un presupuesto para el mismo usuario, categoría, año y mes.
      * Implementa la restricción única de la base de datos.
      */
-    boolean existsByUserIdAndCategoriaIdAndPeriodoInicioAndPeriodoFin(
+    boolean existsByUserIdAndCategoriaIdAndAnioAndMes(
             UUID userId, 
             UUID categoriaId, 
-            LocalDate periodoInicio, 
-            LocalDate periodoFin);
+            Integer anio, 
+            Integer mes);
 
     /**
      * Busca un presupuesto por ID y verifica que pertenezca al usuario.
@@ -82,23 +73,24 @@ public interface PresupuestoRepository extends JpaRepository<Presupuesto, UUID> 
     Optional<Presupuesto> findByIdAndUserId(UUID id, UUID userId);
 
     /**
-     * Lista presupuestos de un usuario ordenados por período descendente y categoría.
+     * Lista presupuestos de un usuario ordenados por año descendente, mes descendente y categoría.
      */
-    List<Presupuesto> findByUserIdOrderByPeriodoInicioDescCategoriaIdAsc(UUID userId);
+    List<Presupuesto> findByUserIdOrderByAnioDescMesDescCategoriaIdAsc(UUID userId);
 
     /**
-     * Lista presupuestos de un usuario por período ordenados por categoría.
+     * Verifica si existe un presupuesto para el mismo usuario, categoría, año y mes, excluyendo un ID específico.
      */
-    List<Presupuesto> findByUserIdAndPeriodoInicioOrderByCategoriaIdAsc(UUID userId, LocalDate periodoInicio);
+    boolean existsByUserIdAndCategoriaIdAndAnioAndMesAndIdNot(
+            UUID userId, UUID categoriaId, Integer anio, Integer mes, UUID id);
 
     /**
-     * Verifica si existe un presupuesto para categoría y período de usuario.
+     * Verifica si existe un presupuesto para categoría, año, mes de usuario.
      */
-    boolean existsByCategoriaIdAndPeriodoInicioAndUserId(UUID categoriaId, LocalDate periodoInicio, UUID userId);
+    boolean existsByCategoriaIdAndAnioAndMesAndUserId(UUID categoriaId, Integer anio, Integer mes, UUID userId);
 
     /**
-     * Verifica si existe un presupuesto para categoría y período de usuario, excluyendo un ID específico.
+     * Verifica si existe un presupuesto para categoría, año, mes de usuario, excluyendo un ID específico.
      */
-    boolean existsByCategoriaIdAndPeriodoInicioAndUserIdAndIdNot(
-            UUID categoriaId, LocalDate periodoInicio, UUID userId, UUID id);
+    boolean existsByCategoriaIdAndAnioAndMesAndUserIdAndIdNot(
+            UUID categoriaId, Integer anio, Integer mes, UUID userId, UUID id);
 }
