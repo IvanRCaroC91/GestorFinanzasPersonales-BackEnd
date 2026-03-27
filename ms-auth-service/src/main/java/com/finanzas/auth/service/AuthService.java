@@ -2,12 +2,15 @@ package com.finanzas.auth.service;
 
 import com.finanzas.auth.dto.LoginRequest;
 import com.finanzas.auth.dto.LoginResponse;
+import com.finanzas.auth.dto.RegisterRequest;
+import com.finanzas.auth.dto.RegisterResponse;
 import com.finanzas.auth.entity.User;
 import com.finanzas.auth.repository.UserRepository;
 import com.finanzas.auth.util.JwtUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +31,107 @@ public class AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    /**
+     * Registra un nuevo usuario en el sistema.
+     * 
+     * Este método implementa el flujo completo de registro de usuarios,
+     * incluyendo validaciones de unicidad, encriptación de contraseña
+     * y persistencia en base de datos.
+     * 
+     * @param registerRequest DTO con los datos del usuario a registrar
+     * @return RegisterResponse con el resultado del proceso de registro
+     * @throws IllegalArgumentException si los datos son inválidos o el usuario ya existe
+     */
+    public RegisterResponse registerUser(RegisterRequest registerRequest) {
+        try {
+            // Paso 1: Validar que el request no sea nulo
+            if (registerRequest == null) {
+                logger.warn("Intento de registro con request nulo");
+                return RegisterResponse.error("Los datos de registro son obligatorios");
+            }
+
+            // Paso 2: Extraer y limpiar datos del request
+            String username = registerRequest.getUsername().trim();
+            String email = registerRequest.getEmail().trim().toLowerCase();
+            String password = registerRequest.getPassword().trim();
+            String celular = registerRequest.getCelular().trim();
+
+            // Paso 3: Validar unicidad del usuario en la base de datos
+            logger.info("Iniciando validación de unicidad para usuario: {}", username);
+            
+            if (userRepository.existsByUsername(username)) {
+                logger.warn("Intento de registro con username ya existente: {}", username);
+                return RegisterResponse.error("El nombre de usuario ya está en uso");
+            }
+
+            if (userRepository.existsByEmail(email)) {
+                logger.warn("Intento de registro con email ya existente: {}", email);
+                return RegisterResponse.error("El correo electrónico ya está registrado");
+            }
+
+            if (userRepository.existsByCelular(celular)) {
+                logger.warn("Intento de registro con celular ya existente: {}", celular);
+                return RegisterResponse.error("El número de celular ya está registrado");
+            }
+
+            // Paso 4: Encriptar la contraseña usando BCrypt
+            logger.info("Encriptando contraseña para usuario: {}", username);
+            String encryptedPassword = encryptPassword(password);
+
+            // Paso 5: Crear la entidad User con los datos validados
+            User newUser = new User();
+            newUser.setUsername(username);
+            newUser.setEmail(email);
+            newUser.setPassword(encryptedPassword);
+            newUser.setPrimerNombre(registerRequest.getPrimerNombre().trim());
+            newUser.setPrimerApellido(registerRequest.getPrimerApellido().trim());
+            
+            // Campos opcionales (pueden ser nulos)
+            if (registerRequest.getSegundoNombre() != null && !registerRequest.getSegundoNombre().trim().isEmpty()) {
+                newUser.setSegundoNombre(registerRequest.getSegundoNombre().trim());
+            }
+            
+            if (registerRequest.getSegundoApellido() != null && !registerRequest.getSegundoApellido().trim().isEmpty()) {
+                newUser.setSegundoApellido(registerRequest.getSegundoApellido().trim());
+            }
+            
+            newUser.setCelular(celular);
+            newUser.setEmailVerificado(false); // Por defecto no verificado
+            newUser.setCelularVerificado(false); // Por defecto no verificado
+
+            // Paso 6: Persistir el usuario en la base de datos
+            logger.info("Persistiendo nuevo usuario en base de datos: {}", username);
+            User savedUser = userRepository.save(newUser);
+
+            // Paso 7: Construir respuesta de éxito
+            logger.info("Usuario registrado exitosamente: {} a las: {}", username, LocalDateTime.now());
+            return RegisterResponse.success(
+                savedUser.getUsername(),
+                savedUser.getEmail(),
+                savedUser.getPrimerNombre(),
+                savedUser.getPrimerApellido(),
+                savedUser.getSegundoNombre(),
+                savedUser.getSegundoApellido()
+            );
+
+        } catch (DataIntegrityViolationException e) {
+            // Capturar violaciones de restricciones de base de datos
+            logger.error("Error de integridad de datos al registrar usuario", e);
+            return RegisterResponse.error("Error: El usuario ya existe en el sistema");
+            
+        } catch (Exception e) {
+            // Capturar cualquier otro error inesperado
+            logger.error("Error inesperado durante el registro de usuario", e);
+            return RegisterResponse.error("Error interno del servidor durante el registro");
+        }
+    }
+
+    /**
+     * Autentica un usuario en el sistema.
+     * 
+     * @param loginRequest DTO con credenciales de login
+     * @return LoginResponse con resultado del proceso de autenticación
+     */
     public LoginResponse login(LoginRequest loginRequest) {
         try {
             // Validar entrada
