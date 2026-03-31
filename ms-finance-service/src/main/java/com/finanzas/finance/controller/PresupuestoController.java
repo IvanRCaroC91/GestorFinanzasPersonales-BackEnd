@@ -43,14 +43,10 @@ public class PresupuestoController {
 
     /**
      * Crea un nuevo presupuesto financiero.
-     * 
-     * HTTP Method: POST
-     * Path: /api/v1/finance/presupuestos
-     * 
-     * @param request Datos del presupuesto a crear
-     * @param userId ID del usuario autenticado (header)
-     * @return PresupuestoResponse con los datos guardados
      */
+    // Este endpoint permite crear un presupuesto financiero.
+    // Recibe los datos desde el frontend, los envía al service
+    // y guarda la información en la base de datos.
     @PostMapping
     public ResponseEntity<ApiResponse<PresupuestoResponse>> crearPresupuesto(
             @Valid @RequestBody PresupuestoRequest request,
@@ -68,13 +64,10 @@ public class PresupuestoController {
 
     /**
      * Lista todos los presupuestos del usuario autenticado.
-     * 
-     * HTTP Method: GET
-     * Path: /api/v1/finance/presupuestos
-     * 
-     * @param userId ID del usuario autenticado (header)
-     * @return Lista de presupuestos del usuario
      */
+    // Este endpoint permite obtener todos los presupuestos del usuario.
+    // Recibe el ID del usuario desde el header, consulta al service
+    // y retorna la lista de presupuestos desde la base de datos.
     @GetMapping
     public ResponseEntity<ApiResponse<List<PresupuestoResponse>>> listarPresupuestos(
             @RequestHeader("X-User-Id") UUID userId) {
@@ -91,15 +84,10 @@ public class PresupuestoController {
 
     /**
      * Lista presupuestos del usuario filtrados por año y mes.
-     * 
-     * HTTP Method: GET
-     * Path: /api/v1/finance/presupuestos?anio={anio}&mes={mes}
-     * 
-     * @param anio Año del presupuesto
-     * @param mes Mes del presupuesto (1-12)
-     * @param userId ID del usuario autenticado (header)
-     * @return Lista de presupuestos filtrados por año y mes
      */
+    // Este endpoint permite obtener presupuestos filtrados por período.
+    // Recibe el año y mes como parámetros, consulta al service
+    // y retorna los presupuestos filtrados desde la base de datos.
     @GetMapping(params = {"anio", "mes"})
     public ResponseEntity<ApiResponse<List<PresupuestoResponse>>> listarPresupuestosPorPeriodo(
             @RequestParam Integer anio,
@@ -118,14 +106,10 @@ public class PresupuestoController {
 
     /**
      * Busca un presupuesto por ID.
-     * 
-     * HTTP Method: GET
-     * Path: /api/v1/finance/presupuestos/{id}
-     * 
-     * @param id ID del presupuesto a buscar
-     * @param userId ID del usuario autenticado (header)
-     * @return PresupuestoResponse con los datos del presupuesto
      */
+    // Este endpoint permite obtener un presupuesto específico.
+    // Recibe el ID del presupuesto, consulta al service
+    // y retorna los datos del presupuesto desde la base de datos.
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<PresupuestoResponse>> buscarPresupuesto(
             @PathVariable UUID id,
@@ -143,15 +127,10 @@ public class PresupuestoController {
 
     /**
      * Actualiza un presupuesto existente.
-     * 
-     * HTTP Method: PUT
-     * Path: /api/v1/finance/presupuestos/{id}
-     * 
-     * @param id ID del presupuesto a actualizar
-     * @param request Nuevos datos del presupuesto
-     * @param userId ID del usuario autenticado (header)
-     * @return PresupuestoResponse actualizado
      */
+    // Este endpoint permite actualizar un presupuesto existente.
+    // Recibe el ID del presupuesto y los nuevos datos, los envía al service
+    // y actualiza la información en la base de datos.
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<PresupuestoResponse>> actualizarPresupuesto(
             @PathVariable UUID id,
@@ -170,14 +149,10 @@ public class PresupuestoController {
 
     /**
      * Elimina un presupuesto existente.
-     * 
-     * HTTP Method: DELETE
-     * Path: /api/v1/finance/presupuestos/{id}
-     * 
-     * @param id ID del presupuesto a eliminar
-     * @param userId ID del usuario autenticado (header)
-     * @return Respuesta con ApiResponse
      */
+    // Este endpoint permite eliminar un presupuesto existente.
+    // Recibe el ID del presupuesto, lo envía al service
+    // y elimina la información de la base de datos.
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> eliminarPresupuesto(
             @PathVariable UUID id,
@@ -194,14 +169,10 @@ public class PresupuestoController {
 
     /**
      * Obtiene la ejecución financiera de un presupuesto específico.
-     * 
-     * HTTP Method: GET
-     * Path: /api/v1/finance/presupuestos/{id}/ejecucion
-     * 
-     * @param id ID del presupuesto a consultar
-     * @param userId ID del usuario autenticado (header)
-     * @return PresupuestoEjecucionResponse con métricas de ejecución
      */
+    // Este endpoint permite obtener la ejecución de un presupuesto.
+    // Recibe el ID del presupuesto, consulta al service
+    // y retorna las métricas de ejecución desde la base de datos.
     @GetMapping("/{id}/ejecucion")
     public ResponseEntity<ApiResponse<PresupuestoEjecucionResponse>> obtenerEjecucionPresupuesto(
             @PathVariable UUID id,
@@ -219,15 +190,10 @@ public class PresupuestoController {
 
     /**
      * Obtiene la ejecución financiera de los presupuestos del usuario para un año y mes específicos.
-     * 
-     * HTTP Method: GET
-     * Path: /api/v1/finance/presupuestos/ejecucion?anio={anio}&mes={mes}
-     * 
-     * @param anio Año del presupuesto
-     * @param mes Mes del presupuesto (1-12)
-     * @param userId ID del usuario autenticado (header)
-     * @return Lista con la ejecución de los presupuestos
      */
+    // Este endpoint permite obtener la ejecución de presupuestos por período.
+    // Recibe el año y mes como parámetros, consulta al service
+    // y retorna las métricas de ejecución desde la base de datos.
     @GetMapping("/ejecucion")
     public ResponseEntity<ApiResponse<List<PresupuestoEjecucionResponse>>> obtenerEjecucionPresupuestos(
             @RequestParam Integer anio,
