@@ -17,17 +17,25 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+// Servicio de autenticación que contiene la lógica de negocio.
+// Maneja el registro de usuarios, validación de credenciales y generación de tokens JWT.
 @Service
 public class AuthService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthService.class);
 
+    // Repositorio para acceder a los datos de usuarios en la base de datos.
+    // Permite buscar, guardar y validar usuarios.
     @Autowired
     private UserRepository userRepository;
     
+    // Utilidad para generar y validar tokens JWT.
+    // Se usa para crear tokens cuando el usuario se autentica correctamente.
     @Autowired
     private JwtUtil jwtUtil;
     
+    // Codificador de contraseñas usando BCrypt.
+    // Se usa para encriptar las contraseñas antes de guardarlas en la base de datos.
     @Autowired
     private PasswordEncoder passwordEncoder;
 
