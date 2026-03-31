@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Controller REST para gestión de categorías financieras.
+ * Controlador REST para gestión de categorías financieras.
  * 
  * Expone endpoints para operaciones CRUD sobre categorías,
  * manteniendo separación de responsabilidades y delegando
@@ -32,14 +32,19 @@ public class CategoriaController {
 
     private static final Logger log = LoggerFactory.getLogger(CategoriaController.class);
 
+    // Servicio que contiene la lógica de negocio para gestión de categorías.
+    // Se inyecta a través del constructor para mejor testabilidad.
     private final CategoriaService categoriaService;
 
+    // Constructor que inicializa el servicio de categorías.
+    // Usa inyección de dependencias por constructor (recomendado por Spring).
     public CategoriaController(CategoriaService categoriaService) {
         this.categoriaService = categoriaService;
     }
 
     /**
      * Crea una nueva categoría financiera.
+     * Recibe los datos de la categoría y los guarda en la base de datos.
      * 
      * HTTP Method: POST
      * Path: /api/v1/finance/categorias
@@ -55,16 +60,20 @@ public class CategoriaController {
         
         log.info("Request POST /api/v1/finance/categorias - Usuario: {}", userId);
         
+        // Delega la creación de la categoría al servicio de negocio.
         CategoriaResponse response = categoriaService.crearCategoria(request, userId);
         
+        // Envuelve la respuesta en el formato estándar de la API.
         ApiResponse<CategoriaResponse> apiResponse = ApiResponse.success(
             "Categoría creada correctamente", response);
         
+        // Retorna 201 Created para indicar que el recurso fue creado exitosamente.
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
     /**
      * Lista todas las categorías del usuario autenticado.
+     * Obtiene las categorías desde la base de datos y las retorna al frontend.
      * 
      * HTTP Method: GET
      * Path: /api/v1/finance/categorias
