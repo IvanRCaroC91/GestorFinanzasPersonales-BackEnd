@@ -28,14 +28,21 @@ import java.util.stream.Collectors;
  * @version 1.0.0
  */
 @Service
-@Transactional
+@Transactional  // Asegura que todas las operaciones sean transaccionales
 public class CategoriaService {
 
     private static final Logger log = LoggerFactory.getLogger(CategoriaService.class);
 
+    // Repositorio para acceder a los datos de categorías en la base de datos.
+    // Permite realizar operaciones CRUD sobre la tabla categorias.
     private final CategoriaRepository categoriaRepository;
+    
+    // Repositorio para acceder a los datos de movimientos.
+    // Se usa para validar que una categoría no tenga movimientos asociados antes de eliminarla.
     private final MovimientoRepository movimientoRepository;
 
+    // Constructor que inicializa los repositorios necesarios.
+    // Usa inyección de dependencias por constructor.
     public CategoriaService(CategoriaRepository categoriaRepository, 
                            MovimientoRepository movimientoRepository) {
         this.categoriaRepository = categoriaRepository;
@@ -44,6 +51,7 @@ public class CategoriaService {
 
     /**
      * Crea una nueva categoría para el usuario.
+     * Realiza validaciones de negocio antes de guardar en la base de datos.
      * 
      * @param request Datos de la categoría a crear
      * @param userId ID del usuario autenticado
