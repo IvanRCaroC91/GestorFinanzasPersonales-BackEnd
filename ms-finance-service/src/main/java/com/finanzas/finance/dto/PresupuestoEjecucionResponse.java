@@ -6,10 +6,11 @@ import java.util.UUID;
 /**
  * DTO Response para representar la ejecución financiera de un presupuesto.
  * 
- * Calcula y expone métricas clave del rendimiento de un presupuesto
+ * Este DTO contiene las métricas calculadas de ejecución de un presupuesto,
  * comparando el límite asignado contra los gastos reales del período.
+ * Es fundamental para el dashboard de control presupuestario.
  * 
- * Este DTO es CRÍTICO para el endpoint de ejecución financiera y contiene:
+ * Campos principales:
  * - id: Identificador único del presupuesto
  * - categoriaId: ID de la categoría asociada
  * - montoLimite: Límite máximo asignado al presupuesto
@@ -24,16 +25,31 @@ import java.util.UUID;
  */
 public class PresupuestoEjecucionResponse {
 
+    // ID único del presupuesto ejecutado.
     private UUID id;
+    
+    // ID de la categoría asociada al presupuesto.
     private UUID categoriaId;
+    
+    // Límite máximo asignado al presupuesto.
     private BigDecimal montoLimite;
+    
+    // Total real gastado en el período.
     private BigDecimal totalGastado;
+    
+    // Saldo disponible restante (montoLimite - totalGastado).
     private BigDecimal disponible;
+    
+    // Porcentaje de ejecución del presupuesto (totalGastado / montoLimite * 100).
     private BigDecimal porcentajeEjecucion;
+    
+    // Año del presupuesto ejecutado.
     private Integer anio;
+    
+    // Mes del presupuesto ejecutado.
     private Integer mes;
 
-    // Constructores
+    // Constructor por defecto.
     public PresupuestoEjecucionResponse() {}
 
     // Constructor completo con 8 parámetros en orden exacto

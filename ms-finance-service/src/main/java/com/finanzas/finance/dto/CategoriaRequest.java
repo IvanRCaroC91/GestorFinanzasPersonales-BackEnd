@@ -8,8 +8,8 @@ import java.util.UUID;
 /**
  * DTO Request para crear y actualizar categorías financieras.
  * 
- * Mapea los campos necesarios para operaciones CRUD sobre la tabla categorias,
- * respetando la estructura exacta de la base de datos existente.
+ * Este DTO contiene los datos que el frontend envía cuando
+ * desea crear o modificar una categoría en el sistema.
  * 
  * Campos según la tabla categorias:
  * - nombre: TEXT NOT NULL
@@ -24,21 +24,25 @@ import java.util.UUID;
  */
 public class CategoriaRequest {
 
+    // Nombre de la categoría (obligatorio, único por usuario).
     @NotBlank(message = "El nombre de la categoría es obligatorio")
     private String nombre;
 
+    // Tipo de movimiento: INGRESO o EGRESO (obligatorio).
     @NotNull(message = "El tipo de movimiento es obligatorio")
     @Pattern(regexp = "INGRESO|EGRESO", message = "El tipo debe ser INGRESO o EGRESO")
     private String tipo;
 
+    // Tipo de gasto: NECESARIO, NO_NECESARIO u OCASIONAL (obligatorio).
     @NotNull(message = "El tipo de gasto es obligatorio")
     @Pattern(regexp = "NECESARIO|NO_NECESARIO|OCASIONAL", 
              message = "El tipo de gasto debe ser NECESARIO, NO_NECESARIO u OCASIONAL")
     private String tipoGasto = "NECESARIO";
 
-    private UUID categoriaPadreId; // Opcional para categorías hijas
+    // ID de la categoría padre (opcional, para subcategorías).
+    private UUID categoriaPadreId;
 
-    // Constructores
+    // Constructor por defecto que establece el tipo de gasto inicial.
     public CategoriaRequest() {
         this.tipoGasto = "NECESARIO"; // Valor por defecto según BD
     }

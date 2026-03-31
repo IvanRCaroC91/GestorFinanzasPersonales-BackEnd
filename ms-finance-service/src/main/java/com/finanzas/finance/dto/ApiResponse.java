@@ -7,13 +7,23 @@ import java.time.LocalDateTime;
 /**
  * DTO estandarizado para todas las respuestas de la API.
  * 
+ * Este DTO envuelve todas las respuestas de los endpoints en un formato
+ * consistente con éxito/fracaso, mensaje, datos y timestamp.
+ * 
  * @param <T> Tipo de dato contenido en el campo data
  */
 public class ApiResponse<T> {
 
+    // Indica si la operación fue exitosa (true) o fallida (false).
     private boolean success;
+    
+    // Mensaje descriptivo del resultado de la operación.
     private String message;
+    
+    // Datos retornados por la operación (puede ser cualquier tipo).
     private T data;
+    
+    // Timestamp de cuando se generó la respuesta.
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private LocalDateTime timestamp;
 
