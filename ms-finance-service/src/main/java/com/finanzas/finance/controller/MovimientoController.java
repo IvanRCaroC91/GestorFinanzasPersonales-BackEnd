@@ -45,14 +45,10 @@ public class MovimientoController {
 
     /**
      * Crea un nuevo movimiento financiero.
-     * 
-     * HTTP Method: POST
-     * Path: /api/v1/finance/movimientos
-     * 
-     * @param request Datos del movimiento a crear
-     * @param userId ID del usuario autenticado (header)
-     * @return MovimientoResponse con los datos guardados
      */
+    // Este endpoint permite crear un movimiento financiero.
+    // Recibe los datos desde el frontend, los envía al service
+    // y guarda la información en la base de datos.
     @PostMapping
     public ResponseEntity<ApiResponse<MovimientoResponse>> crearMovimiento(
             @Valid @RequestBody MovimientoRequest request,
@@ -70,13 +66,10 @@ public class MovimientoController {
 
     /**
      * Lista todos los movimientos del usuario autenticado.
-     * 
-     * HTTP Method: GET
-     * Path: /api/v1/finance/movimientos
-     * 
-     * @param userId ID del usuario autenticado (header)
-     * @return Lista de movimientos del usuario
      */
+    // Este endpoint permite obtener todos los movimientos del usuario.
+    // Recibe el ID del usuario desde el header, consulta al service
+    // y retorna la lista de movimientos desde la base de datos.
     @GetMapping
     public ResponseEntity<ApiResponse<List<MovimientoResponse>>> listarMovimientos(
             @RequestHeader("X-User-Id") UUID userId) {
@@ -93,14 +86,10 @@ public class MovimientoController {
 
     /**
      * Lista movimientos del usuario filtrados por tipo.
-     * 
-     * HTTP Method: GET
-     * Path: /api/v1/finance/movimientos?tipo={tipo}
-     * 
-     * @param tipo Tipo de movimiento (INGRESO|EGRESO)
-     * @param userId ID del usuario autenticado (header)
-     * @return Lista de movimientos filtrados por tipo
      */
+    // Este endpoint permite obtener movimientos filtrados por tipo.
+    // Recibe el tipo como parámetro, consulta al repository
+    // y retorna los movimientos filtrados desde la base de datos.
     @GetMapping(params = "tipo")
     public ResponseEntity<ApiResponse<List<MovimientoResponse>>> listarMovimientosPorTipo(
             @RequestParam String tipo,
@@ -130,15 +119,10 @@ public class MovimientoController {
 
     /**
      * Actualiza un movimiento existente.
-     * 
-     * HTTP Method: PUT
-     * Path: /api/v1/finance/movimientos/{id}
-     * 
-     * @param id ID del movimiento a actualizar
-     * @param request Nuevos datos del movimiento
-     * @param userId ID del usuario autenticado (header)
-     * @return MovimientoResponse actualizado
      */
+    // Este endpoint permite actualizar un movimiento existente.
+    // Recibe el ID del movimiento y los nuevos datos, los envía al service
+    // y actualiza la información en la base de datos.
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<MovimientoResponse>> actualizarMovimiento(
             @PathVariable UUID id,
@@ -157,14 +141,10 @@ public class MovimientoController {
 
     /**
      * Elimina un movimiento existente.
-     * 
-     * HTTP Method: DELETE
-     * Path: /api/v1/finance/movimientos/{id}
-     * 
-     * @param id ID del movimiento a eliminar
-     * @param userId ID del usuario autenticado (header)
-     * @return Respuesta con ApiResponse
      */
+    // Este endpoint permite eliminar un movimiento existente.
+    // Recibe el ID del movimiento, lo envía al service
+    // y elimina la información de la base de datos.
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> eliminarMovimiento(
             @PathVariable UUID id,
