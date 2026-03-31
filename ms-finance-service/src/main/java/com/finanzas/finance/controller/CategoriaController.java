@@ -97,14 +97,10 @@ public class CategoriaController {
 
     /**
      * Lista categorías del usuario filtradas por tipo.
-     * 
-     * HTTP Method: GET
-     * Path: /api/v1/finance/categorias?tipo={tipo}
-     * 
-     * @param tipo Tipo de categoría (INGRESO|EGRESO)
-     * @param userId ID del usuario autenticado (header)
-     * @return Lista de categorías filtradas por tipo
      */
+    // Este endpoint permite obtener categorías filtradas por tipo.
+    // Recibe el tipo como parámetro, consulta al service
+    // y retorna las categorías filtradas desde la base de datos.
     @GetMapping(params = "tipo")
     public ResponseEntity<ApiResponse<List<CategoriaResponse>>> listarCategoriasPorTipo(
             @RequestParam String tipo,
@@ -122,14 +118,10 @@ public class CategoriaController {
 
     /**
      * Busca una categoría por ID.
-     * 
-     * HTTP Method: GET
-     * Path: /api/v1/finance/categorias/{id}
-     * 
-     * @param id ID de la categoría a buscar
-     * @param userId ID del usuario autenticado (header)
-     * @return CategoriaResponse con los datos de la categoría
      */
+    // Este endpoint permite obtener una categoría específica.
+    // Recibe el ID de la categoría, consulta al service
+    // y retorna los datos de la categoría desde la base de datos.
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<CategoriaResponse>> buscarCategoria(
             @PathVariable UUID id,
@@ -147,15 +139,10 @@ public class CategoriaController {
 
     /**
      * Actualiza una categoría existente.
-     * 
-     * HTTP Method: PUT
-     * Path: /api/v1/finance/categorias/{id}
-     * 
-     * @param id ID de la categoría a actualizar
-     * @param request Nuevos datos de la categoría
-     * @param userId ID del usuario autenticado (header)
-     * @return CategoriaResponse actualizado
      */
+    // Este endpoint permite actualizar una categoría existente.
+    // Recibe el ID de la categoría y los nuevos datos, los envía al service
+    // y actualiza la información en la base de datos.
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<CategoriaResponse>> actualizarCategoria(
             @PathVariable UUID id,
@@ -174,14 +161,10 @@ public class CategoriaController {
 
     /**
      * Elimina una categoría existente.
-     * 
-     * HTTP Method: DELETE
-     * Path: /api/v1/finance/categorias/{id}
-     * 
-     * @param id ID de la categoría a eliminar
-     * @param userId ID del usuario autenticado (header)
-     * @return Respuesta con ApiResponse
      */
+    // Este endpoint permite eliminar una categoría existente.
+    // Recibe el ID de la categoría, lo envía al service
+    // y elimina la información de la base de datos.
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> eliminarCategoria(
             @PathVariable UUID id,
