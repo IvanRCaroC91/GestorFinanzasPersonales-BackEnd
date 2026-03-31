@@ -23,19 +23,26 @@ import java.util.UUID;
 @Table(name = "categorias")
 public class Categoria {
 
+    // Identificador único de la categoría (UUID).
+    // Se genera automáticamente usando gen_random_uuid() de PostgreSQL.
     @Id
     @Column(name = "id", columnDefinition = "UUID")
     @GeneratedValue(strategy = GenerationType.AUTO) // PostgreSQL gen_random_uuid()
     private UUID id;
 
+    // ID del usuario dueño de la categoría.
+    // Garantiza el aislamiento de datos entre usuarios.
     @Column(name = "user_id", nullable = false, columnDefinition = "UUID")
     private UUID userId;
 
+    // Nombre descriptivo de la categoría.
+    // No puede ser nulo y debe ser único por usuario.
     @Column(name = "nombre", nullable = false, columnDefinition = "TEXT")
     private String nombre;
 
     /**
-     * Mapeo del ENUM PostgreSQL tipo_movimiento
+     * Mapeo del ENUM PostgreSQL tipo_movimiento.
+     * Define si la categoría es para ingresos o egresos.
      * Valores: 'INGRESO', 'EGRESO'
      */
     @Enumerated(EnumType.STRING)
@@ -43,7 +50,8 @@ public class Categoria {
     private TipoMovimiento tipo;
 
     /**
-     * Mapeo del ENUM PostgreSQL tipo_gasto
+     * Mapeo del ENUM PostgreSQL tipo_gasto.
+     * Clasifica los egresos por nivel de necesidad.
      * Valores: 'NECESARIO', 'NO NECESARIO', 'OCASIONAL'
      * Default: 'NECESARIO'
      */
