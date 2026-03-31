@@ -19,9 +19,11 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  * @version 1.0.0
  */
 @SpringBootApplication
-@EnableDiscoveryClient
+@EnableDiscoveryClient  // Habilita el cliente para descubrir otros microservicios en Eureka
 public class FinanceServiceApplication {
 
+    // Método principal que inicia el servicio de gestión financiera.
+    // Este método es el punto de entrada de la aplicación Spring Boot.
     public static void main(String[] args) {
         SpringApplication.run(FinanceServiceApplication.class, args);
     }
