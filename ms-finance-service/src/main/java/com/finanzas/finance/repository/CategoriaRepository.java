@@ -17,27 +17,44 @@ import java.util.UUID;
  * @author Sistema de Finanzas Personales
  * @version 1.0.0
  */
-@Repository
+@Repository  // Indica que esta interfaz es un repositorio de Spring Data JPA
 public interface CategoriaRepository extends JpaRepository<Categoria, UUID> {
 
     /**
      * Busca todas las categorías de un usuario específico.
-     * Filtra por user_id para garantizar seguridad de datos.
+     * Filtra por user_id para garantizar seguridad de datos y aislamiento entre usuarios.
+     * 
+     * @param userId ID del usuario cuyas categorías se desean obtener
+     * @return Lista de categorías pertenecientes al usuario
      */
     List<Categoria> findByUserId(UUID userId);
 
     /**
      * Busca categorías de un usuario por tipo (INGRESO/EGRESO).
+     * Permite filtrar las categorías según el tipo de movimiento que representan.
+     * 
+     * @param userId ID del usuario
+     * @param tipo Tipo de movimiento (INGRESO o EGRESO)
+     * @return Lista de categorías del usuario filtradas por tipo
      */
     List<Categoria> findByUserIdAndTipo(UUID userId, Categoria.TipoMovimiento tipo);
 
     /**
      * Busca categorías de un usuario por tipo de gasto.
+     * Permite filtrar las categorías según el nivel de necesidad del gasto.
+     * 
+     * @param userId ID del usuario
+     * @param tipoGasto Tipo de gasto (NECESARIO, NO NECESARIO, OCASIONAL)
+     * @return Lista de categorías del usuario filtradas por tipo de gasto
      */
     List<Categoria> findByUserIdAndTipoGasto(UUID userId, Categoria.TipoGasto tipoGasto);
 
     /**
      * Busca categorías de un usuario que son categorías padre (sin categoria_padre_id).
+     * Retorna las categorías raíz que pueden tener subcategorías hijas.
+     * 
+     * @param userId ID del usuario
+     * @return Lista de categorías padre del usuario
      */
     List<Categoria> findByUserIdAndCategoriaPadreIdIsNull(UUID userId);
 
