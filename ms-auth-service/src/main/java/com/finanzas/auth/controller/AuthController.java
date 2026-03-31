@@ -29,11 +29,10 @@ public class AuthController {
 
     /**
      * Endpoint para autenticar usuarios en el sistema.
-     * Recibe credenciales del usuario y retorna un token JWT si son válidas.
-     * 
-     * @param loginRequest DTO con credenciales de login validadas
-     * @return ResponseEntity con LoginResponse y código HTTP apropiado
      */
+    // Este endpoint permite autenticar usuarios en el sistema.
+    // Recibe las credenciales desde el frontend, las envía al service
+    // y retorna un token JWT si las credenciales son válidas.
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         // Delega la validación de credenciales al servicio de autenticación.
@@ -52,14 +51,10 @@ public class AuthController {
 
     /**
      * Endpoint para registrar nuevos usuarios en el sistema.
-     * 
-     * Este endpoint permite el registro público de nuevos usuarios
-     * sin requerir autenticación previa. Realiza validaciones
-     * completas de los datos y retorna información del usuario registrado.
-     * 
-     * @param registerRequest DTO con datos del usuario a registrar, validados con Bean Validation
-     * @return ResponseEntity con RegisterResponse y código HTTP apropiado
      */
+    // Este endpoint permite registrar nuevos usuarios en el sistema.
+    // Recibe los datos desde el frontend, los envía al service
+    // y crea la cuenta del usuario en la base de datos.
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
         try {
