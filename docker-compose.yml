@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15-alpine
@@ -27,6 +25,39 @@ services:
     # Configuración de red
     networks:
       - finanzas-network
+
+  # Eureka Service Registry
+  eureka:
+    build:
+      context: .
+      dockerfile: ./ms-service-registry/Dockerfile
+    container_name: finanzas-eureka
+    restart: unless-stopped
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    networks:
+      - finanzas-network
+    depends_on:
+      - postgres
+
+  # API Gateway
+  gateway:
+    build:
+      context: .
+      dockerfile: ./ms-api-gateway/Dockerfile
+    container_name: finanzas-gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka:8761/eureka/
+    networks:
+      - finanzas-network
+    depends_on:
+      - eureka
 
 # Volumen para persistencia de datos de PostgreSQL
 volumes:

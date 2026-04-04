@@ -12,8 +12,8 @@ import org.springframework.cloud.netflix.eureka.server.EnableEurekaServer;
 @EnableEurekaServer  // Habilita el servidor Eureka para descubrimiento de servicios
 public class ServiceRegistryApplication {
     
-    // Método principal que inicia el servidor Eureka.
-    // Este método es el punto de entrada de la aplicación Spring Boot.
+    // Metodo principal que inicia el servidor Eureka.
+    // Este metodo es el punto de entrada de la aplicación Spring Boot.
     public static void main(String[] args) {
         SpringApplication.run(ServiceRegistryApplication.class, args);
     }
