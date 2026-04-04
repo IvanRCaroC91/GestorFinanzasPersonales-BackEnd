@@ -39,12 +39,14 @@ El backend ha evolucionado desde un prototipo académico hasta una API robusta c
 ### 🟢 Backend Completo y Operativo
 
 #### **Microservicios Funcionales**
-- ✅ **Service Registry**: Eureka Server en puerto 8761
-- ✅ **API Gateway**: Gateway en puerto 8080 con routing y CORS
+- ✅ **Service Registry**: Eureka Server en puerto 8761 (Dockerizado)
+- ✅ **API Gateway**: Gateway en puerto 8080 con routing y CORS (Dockerizado)
 - ✅ **Auth Service**: Autenticación JWT en puerto 8081
 - ✅ **Finance Service**: Gestión financiera en puerto 8083
 
 #### **Características Implementadas**
+- ✅ **Dockerización**: Eureka y Gateway en contenedores optimizados
+- ✅ **Scripts Docker**: Automatización de inicio/detención
 - ✅ **Autenticación**: Login/Register con JWT y bcrypt
 - ✅ **Categorías**: CRUD completo para categorías financieras
 - ✅ **Movimientos**: Gestión de transacciones con validación
@@ -53,7 +55,8 @@ El backend ha evolucionado desde un prototipo académico hasta una API robusta c
 - ✅ **Service Discovery**: Descubrimiento automático con Eureka
 
 #### **Estado Técnico**
-- ✅ **Java**: JDK 21 con Spring Boot 3.x
+- ✅ **Java**: JDK 21 con Spring Boot 3.x (Docker compatible)
+- ✅ **Docker**: Contenerización completa de servicios críticos
 - ✅ **Base de Datos**: PostgreSQL 15 con Docker
 - ✅ **Build**: Maven con compilación exitosa
 - ✅ **Git**: Historial limpio con commits versionados
@@ -159,6 +162,7 @@ El backend ha evolucionado desde un prototipo académico hasta una API robusta c
 - **Propósito**: Lenguaje principal de desarrollo
 - **Ventajas**: Performance mejorada, features modernas, LTS
 - **Uso en el proyecto**: Lógica de negocio, controllers, services
+- **Compatibilidad**: JDK Territorium soportado
 
 #### **Spring Boot 3.2.5**
 - **Propósito**: Framework principal para microservicios
@@ -180,17 +184,29 @@ El backend ha evolucionado desde un prototipo académico hasta una API robusta c
 - **Ventajas**: Abstracción de base de datos, relaciones automáticas
 - **Uso en el proyecto**: Entidades, repositories, queries
 
+### Contenerización y Orquestación
+
+#### **Docker & Docker Compose**
+- **Propósito**: Contenerización y orquestación de servicios
+- **Ventajas**: Portabilidad, escalabilidad, aislamiento, reproducibilidad
+- **Uso en el proyecto**: 
+  - Eureka Server y API Gateway containerizados
+  - PostgreSQL en contenedor
+  - Networking entre servicios
+  - Multi-stage builds optimizados
+
+#### **Dockerfiles Optimizados**
+- **Java 21 Alpine**: Imágenes ligeras basadas en Eclipse Temurin
+- **Multi-stage builds**: Reducción del tamaño final de imágenes
+- **Perfiles Docker**: Configuración específica para entorno contenedorizado
+
 ### Base de Datos
 
 #### **PostgreSQL 15**
 - **Propósito**: Base de datos relacional principal
 - **Ventajas**: ACID compliance, performance, features avanzadas
 - **Uso en el proyecto**: Persistencia de todos los datos financieros
-
-#### **Docker & Docker Compose**
-- **Propósito**: Contenerización de base de datos
-- **Ventajas**: Portabilidad, configuración reproducible
-- **Uso en el proyecto**: PostgreSQL en contenedor
+- **Deployment**: Contenedor Docker con persistencia de datos
 
 ### Seguridad
 
@@ -219,7 +235,9 @@ El backend ha evolucionado desde un prototipo académico hasta una API robusta c
 GestorFinanzasPersonales-BackEnd/
 ├── 📄 Archivos de configuración raíz
 │   ├── pom.xml                       # POM padre con módulos
-│   ├── docker-compose.yml            # PostgreSQL container
+│   ├── docker-compose.yml            # Configuración Docker completa
+│   ├── start-docker-services.bat     # Script inicio Docker
+│   ├── stop-docker-services.bat      # Script detención Docker
 │   ├── .gitignore                    # Ignorar archivos Git
 │   └── README.md                     # Este archivo
 │
@@ -227,24 +245,30 @@ GestorFinanzasPersonales-BackEnd/
 │   ├── init.sql                      # Script inicialización
 │   └── test-data.sql                 # Datos de prueba
 │
-├── 📁 ms-service-registry/           # Eureka Server
+├── 📁 ms-service-registry/           # Eureka Server (Dockerizado)
 │   ├── 📄 pom.xml                   # POM del servicio
+│   ├── 📄 Dockerfile                # Configuración contenedor
+│   ├── 📄 .dockerignore             # Optimización build Docker
 │   ├── 📁 src/main/java/            # Código fuente Java
 │   │   └── 📁 com/finanzas/registry/
 │   │       ├── ServiceRegistryApplication.java
 │   │       └── config/
 │   └── 📁 src/main/resources/       # Recursos
-│       └── application.yml           # Configuración
+│       ├── application.yml           # Configuración local
+│       └── application-docker.yml    # Configuración Docker
 │
-├── 📁 ms-api-gateway/                # API Gateway
+├── 📁 ms-api-gateway/                # API Gateway (Dockerizado)
 │   ├── 📄 pom.xml                   # POM del gateway
+│   ├── 📄 Dockerfile                # Configuración contenedor
+│   ├── 📄 .dockerignore             # Optimización build Docker
 │   ├── 📁 src/main/java/            # Código fuente
 │   │   └── 📁 com/finanzas/apigateway/
 │   │       ├── ApiGatewayApplication.java
 │   │       ├── filter/              # Filtros JWT
 │   │       └── config/              # Configuración
 │   └── 📁 src/main/resources/       # Recursos
-│       └── application.yml           # Configuración gateway
+│       ├── application.yml           # Configuración local
+│       └── application-docker.yml    # Configuración Docker
 │
 ├── 📁 ms-auth-service/               # Auth Service
 │   ├── 📄 pom.xml                   # POM del servicio
@@ -310,7 +334,81 @@ GestorFinanzasPersonales-BackEnd/
 
 ## 6. Instalación y Configuración
 
-### Requisitos Previos
+### 🐳 **Opción 1: Ejecución con Docker (Recomendado)**
+
+Esta es la forma más sencilla y recomendada para ejecutar los servicios en producción.
+
+#### Requisitos Previos Docker
+
+- **Docker**: Versión 20.10 o superior
+- **Docker Compose**: Versión 2.0 o superior
+- **Git**: Para clonar el repositorio
+
+#### Paso 1: Clonar el Repositorio
+
+```bash
+git clone https://github.com/IvanRCaroC91/GestorFinanzasPersonales-BackEnd.git
+cd GestorFinanzasPersonales-BackEnd
+```
+
+#### Paso 2: Iniciar Servicios con Docker
+
+**Opción A: Usar Scripts Automáticos**
+```bash
+# Iniciar todos los servicios Docker
+./start-docker-services.bat
+
+# Detener todos los servicios Docker
+./stop-docker-services.bat
+```
+
+**Opción B: Comandos Manuales**
+```bash
+# Construir imágenes Docker
+docker-compose build eureka gateway
+
+# Iniciar servicios
+docker-compose up -d eureka gateway postgres
+
+# Verificar estado
+docker-compose ps
+```
+
+#### Paso 3: Verificar Servicios Docker
+
+```bash
+# Eureka Dashboard
+curl http://localhost:8761
+
+# Gateway Health Check
+curl http://localhost:8080/actuator/health
+
+# Ver logs de servicios
+docker logs finanzas-eureka
+docker logs finanzas-gateway
+```
+
+#### URLs de Acceso Docker
+
+- **Eureka Dashboard**: http://localhost:8761
+- **API Gateway**: http://localhost:8080
+- **Gateway Health**: http://localhost:8080/actuator/health
+- **PostgreSQL**: localhost:5432
+
+#### Configuración Docker
+
+Los servicios están configurados para ejecutarse en contenedores optimizados:
+
+- **Java 21**: Compatible con JDK Territorium
+- **Multi-stage builds**: Imágenes ligeras y eficientes
+- **Networking**: Comunicación segura entre contenedores
+- **Perfiles Docker**: Configuración específica para entorno Docker
+
+---
+
+### 💻 **Opción 2: Ejecución Local (Desarrollo)**
+
+#### Requisitos Previos Locales
 
 - **Java**: JDK 21 o superior
 - **Maven**: Versión 3.8 o superior
@@ -318,14 +416,14 @@ GestorFinanzasPersonales-BackEnd/
 - **Git**: Para clonar el repositorio
 - **PostgreSQL Client**: Para administración (opcional)
 
-### Paso 1: Clonar el Repositorio
+#### Paso 1: Clonar el Repositorio
 
 ```bash
-git clone https://github.com/tu-usuario/gestion-financiera-backend.git
-cd gestion-financiera-backend
+git clone https://github.com/IvanRCaroC91/GestorFinanzasPersonales-BackEnd.git
+cd GestorFinanzasPersonales-BackEnd
 ```
 
-### Paso 2: Iniciar Base de Datos PostgreSQL
+#### Paso 2: Iniciar Base de Datos PostgreSQL
 
 ```bash
 # Iniciar PostgreSQL con Docker Compose
@@ -341,7 +439,7 @@ docker ps
 - **User**: admin
 - **Password**: admin123
 
-### Paso 3: Compilar el Proyecto
+#### Paso 3: Compilar el Proyecto
 
 ```bash
 # Compilar todos los módulos
@@ -351,7 +449,7 @@ mvn clean compile
 mvn clean test
 ```
 
-### Paso 4: Ejecutar los Microservicios
+#### Paso 4: Ejecutar los Microservicios
 
 ```bash
 # 1. Iniciar Service Registry (Eureka)
@@ -367,7 +465,7 @@ mvn spring-boot:run -pl ms-auth-service
 mvn spring-boot:run -pl ms-finance-service
 ```
 
-### Paso 5: Verificar Servicios
+#### Paso 5: Verificar Servicios
 
 ```bash
 # Service Registry
@@ -395,6 +493,31 @@ mvn spring-boot:run -pl ms-api-gateway &
 mvn spring-boot:run -pl ms-auth-service &
 mvn spring-boot:run -pl ms-finance-service &
 ```
+
+---
+
+### 🐳 **Archivos Docker Disponibles**
+
+El proyecto incluye configuración Docker completa:
+
+#### **Dockerfiles**
+- `ms-service-registry/Dockerfile` - Eureka Server containerizado
+- `ms-api-gateway/Dockerfile` - API Gateway containerizado
+
+#### **Configuración Docker**
+- `docker-compose.yml` - Orquestación de servicios
+- `application-docker.yml` - Configuración específica Docker
+- `.dockerignore` - Optimización de build
+
+#### **Scripts de Gestión**
+- `start-docker-services.bat` - Inicio automático
+- `stop-docker-services.bat` - Detención automática
+
+#### **Beneficios de Docker**
+- ✅ **Portabilidad**: Ejecución consistente en cualquier entorno
+- ✅ **Escalabilidad**: Fácil escalado horizontal
+- ✅ **Aislamiento**: Servicios independientes y seguros
+- ✅ **Reproducibilidad**: Mismas condiciones en dev/prod
 
 ---
 
