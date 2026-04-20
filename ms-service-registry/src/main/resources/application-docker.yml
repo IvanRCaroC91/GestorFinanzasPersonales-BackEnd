@@ -3,6 +3,9 @@ spring:
     name: ms-service-registry
 
 eureka:
+  instance:
+    port: 8761
+    hostname: 0.0.0.0
   client:
     register-with-eureka: false
     fetch-registry: false
