@@ -2,9 +2,9 @@
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY pom.xml ./pom.xml
-COPY ms-finance-service/pom.xml ./ms-finance-service/pom.xml
-COPY ms-finance-service/src ./ms-finance-service/src
-RUN cd ms-finance-service && mvn clean package -DskipTests
+COPY ms-finance-service/pom.xml ./pom.xml
+COPY ms-finance-service/src ./src
+RUN mvn clean package -DskipTests
 
 # Runtime stage
 FROM eclipse-temurin:21-jre-alpine
