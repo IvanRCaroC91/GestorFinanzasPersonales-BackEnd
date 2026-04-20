@@ -55,11 +55,23 @@ eureka:
   instance:
     hostname: ${RAILWAY_PUBLIC_DOMAIN:gateway}
     prefer-ip-address: false
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
 
 logging:
   level:
     org.springframework.cloud.gateway: INFO
     com.finanzas.apigateway: INFO
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
 
 # Configuración JWT (debe coincidir con ms-auth-service)
 jwt:
