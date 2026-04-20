@@ -6,9 +6,9 @@ services:
     
     # Variables de entorno para la base de datos
     environment:
-      POSTGRES_DB: finanzas_db
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: admin123
+      POSTGRES_DB: ${POSTGRES_DB:-finanzas_db}
+      POSTGRES_USER: ${POSTGRES_USER:-admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
       POSTGRES_HOST_AUTH_METHOD: trust
     
     # Exponer puerto para conexión local
@@ -36,7 +36,8 @@ services:
     ports:
       - "8761:8761"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8761/eureka/}
     networks:
       - finanzas-network
     depends_on:
@@ -52,11 +53,56 @@ services:
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8761/eureka/}
+      - JWT_SECRET=${JWT_SECRET:-mySecretKey123456789012345678901234567890}
     networks:
       - finanzas-network
     depends_on:
+      - eureka
+
+  # Auth Service
+  auth-service:
+    build:
+      context: .
+      dockerfile: ./ms-auth-service/Dockerfile
+    container_name: finanzas-auth
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
+      - DATABASE_URL=${DATABASE_URL:-jdbc:postgresql://postgres:5432/finanzas_db}
+      - DATABASE_USER=${DATABASE_USER:-admin}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-admin123}
+      - JWT_SECRET=${JWT_SECRET:-mySecretKey123456789012345678901234567890}
+      - JWT_EXPIRATION=${JWT_EXPIRATION:-86400000}
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8761/eureka/}
+    networks:
+      - finanzas-network
+    depends_on:
+      - postgres
+      - eureka
+
+  # Finance Service
+  finance-service:
+    build:
+      context: .
+      dockerfile: ./ms-finance-service/Dockerfile
+    container_name: finanzas-finance
+    restart: unless-stopped
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
+      - DATABASE_URL=${DATABASE_URL:-jdbc:postgresql://postgres:5432/finanzas_db}
+      - DATABASE_USER=${DATABASE_USER:-admin}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-admin123}
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8761/eureka/}
+    networks:
+      - finanzas-network
+    depends_on:
+      - postgres
       - eureka
 
 # Volumen para persistencia de datos de PostgreSQL

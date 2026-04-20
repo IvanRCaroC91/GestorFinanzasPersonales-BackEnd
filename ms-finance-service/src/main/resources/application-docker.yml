@@ -1,0 +1,74 @@
+server:
+  port: ${FINANCE_PORT:8083}
+
+spring:
+  application:
+    name: ms-finance-service
+  
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://postgres:5432/finanzas_db}
+    username: ${DATABASE_USER:admin}
+    password: ${DATABASE_PASSWORD:admin123}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    format_sql: true
+  
+  # Configuración para manejar tipos ENUM de PostgreSQL
+  jackson:
+    default-property-inclusion: non_null
+
+  # Configuración MVC para manejo de errores 404
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+
+logging:
+  level:
+    # INFO para producción
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: INFO
+    org.springframework.web.servlet.DispatcherServlet: INFO
+    
+    # INFO para ver carga de beans y contexto
+    org.springframework.beans.factory: INFO
+    org.springframework.context: INFO
+    
+    # INFO para ver errores del controller
+    com.finanzas.finance: INFO
+    
+    # WARN para ver errores de conexión a BD
+    org.springframework.jdbc: WARN
+    org.hibernate: WARN
+    com.zaxxer.hikari: WARN
+
+# Eureka Client Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://eureka:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+  
+  instance:
+    hostname: ${RAILWAY_PUBLIC_DOMAIN:finance-service}
+    prefer-ip-address: false
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized

@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: ${GATEWAY_PORT:8080}
 
 spring:
   application:
@@ -10,10 +10,12 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
-            # Orígenes permitidos (frontend React) - usar allowedOrigins en lugar de patterns
+            # Orígenes permitidos (frontend local y Railway)
             allowedOrigins:
+              - ${FRONTEND_URL:http://localhost:5173}
               - http://localhost:5173
               - http://127.0.0.1:5173
+              - https://*.railway.app
             # Métodos HTTP permitidos
             allowedMethods:
               - GET
@@ -47,16 +49,17 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://eureka:8761/eureka/
+      defaultZone: ${EUREKA_URL:http://eureka:8761/eureka/}
     register-with-eureka: true
     fetch-registry: true
   instance:
-    prefer-ip-address: true
+    hostname: ${RAILWAY_PUBLIC_DOMAIN:gateway}
+    prefer-ip-address: false
 
 logging:
   level:
     org.springframework.cloud.gateway: INFO
-    com.finanzas.apigateway: DEBUG
+    com.finanzas.apigateway: INFO
 
 # Configuración JWT (debe coincidir con ms-auth-service)
 jwt:
