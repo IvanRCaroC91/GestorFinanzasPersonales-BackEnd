@@ -29,8 +29,8 @@ services:
   # Eureka Service Registry
   eureka:
     build:
-      context: .
-      dockerfile: ./ms-service-registry/Dockerfile
+      context: ./ms-service-registry
+      dockerfile: ./Dockerfile
     container_name: finanzas-eureka
     restart: unless-stopped
     ports:
@@ -64,8 +64,8 @@ services:
   # Auth Service
   auth-service:
     build:
-      context: .
-      dockerfile: ./ms-auth-service/Dockerfile
+      context: ./ms-auth-service
+      dockerfile: ./Dockerfile
     container_name: finanzas-auth
     restart: unless-stopped
     ports:
@@ -87,8 +87,8 @@ services:
   # Finance Service
   finance-service:
     build:
-      context: .
-      dockerfile: ./ms-finance-service/Dockerfile
+      context: ./ms-finance-service
+      dockerfile: ./Dockerfile
     container_name: finanzas-finance
     restart: unless-stopped
     ports:
