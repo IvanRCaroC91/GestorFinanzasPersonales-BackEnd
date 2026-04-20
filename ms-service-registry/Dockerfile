@@ -2,9 +2,9 @@
 FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY pom.xml ./pom.xml
-COPY ms-service-registry/pom.xml ./ms-service-registry/pom.xml
-COPY ms-service-registry/src ./ms-service-registry/src
-RUN cd ms-service-registry && mvn clean package -DskipTests
+COPY ms-service-registry/pom.xml ./pom.xml
+COPY ms-service-registry/src ./src
+RUN mvn clean package -DskipTests
 
 # Runtime stage
 FROM eclipse-temurin:21-jre-alpine
