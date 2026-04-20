@@ -1,5 +1,5 @@
 server:
-  port: 8081
+  port: ${PORT:8081}
 
 spring:
   application:
@@ -7,16 +7,16 @@ spring:
   
   # Configuración de Base de Datos PostgreSQL
   datasource:
-    url: jdbc:postgresql://localhost:5432/finanzas_db
-    username: admin
-    password: admin123
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/finanzas_db}
+    username: ${DATABASE_USER:admin}
+    password: ${DATABASE_PASSWORD:admin123}
     driver-class-name: org.postgresql.Driver
   
   # Configuración JPA
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -32,19 +32,31 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
     register-with-eureka: true
     fetch-registry: true
   instance:
-    hostname: localhost
-    prefer-ip-address: true
+    hostname: ${RAILWAY_PUBLIC_DOMAIN:localhost}
+    prefer-ip-address: false
+    non-secure-port: ${PORT:8081}
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
 
 logging:
   level:
-    com.finanzas.auth: DEBUG
-    org.springframework.cloud.netflix.eureka: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.finanzas.auth: INFO
+    org.springframework.cloud.netflix.eureka: INFO
+    org.hibernate.SQL: WARN
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
 
 # Configuración JWT
 jwt:
