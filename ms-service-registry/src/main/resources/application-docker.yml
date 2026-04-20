@@ -1,5 +1,5 @@
 server:
-  port: 8761
+  port: ${EUREKA_PORT:8761}
 
 spring:
   application:
@@ -10,12 +10,15 @@ eureka:
     register-with-eureka: false
     fetch-registry: false
     service-url:
-      defaultZone: http://eureka:8761/eureka/
+      defaultZone: ${EUREKA_URL:http://eureka:8761/eureka/}
   server:
     enable-self-preservation: false
     eviction-interval-timer-in-ms: 5000
+  instance:
+    hostname: ${RAILWAY_PUBLIC_DOMAIN:eureka}
+    prefer-ip-address: false
 
 logging:
   level:
-    com.netflix.eureka: DEBUG
-    com.netflix.discovery: DEBUG
+    com.netflix.eureka: INFO
+    com.netflix.discovery: INFO
