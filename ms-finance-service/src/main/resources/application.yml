@@ -5,10 +5,13 @@ spring:
   application:
     name: ms-finance-service
   
+  # Configuración de Base de Datos PostgreSQL compatible con Railway y Local
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/finanzas_db}
-    username: ${DATABASE_USER:admin}
-    password: ${DATABASE_PASSWORD:admin123}
+    # Railway: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
+    # Local: jdbc:postgresql://localhost:5432/finanzas_db
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:finanzas_db}}
+    username: ${SPRING_DATASOURCE_USERNAME:${PGUSER:admin}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${PGPASSWORD:admin123}}
     driver-class-name: org.postgresql.Driver
   
   jpa:
@@ -53,12 +56,12 @@ logging:
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
     register-with-eureka: true
     fetch-registry: true
   
   instance:
-    hostname: ${RAILWAY_PUBLIC_DOMAIN:localhost}
+    hostname: ${RAILWAY_STATIC_URL:localhost}
     prefer-ip-address: false
     non-secure-port: ${PORT:8083}
     lease-renewal-interval-in-seconds: 30
