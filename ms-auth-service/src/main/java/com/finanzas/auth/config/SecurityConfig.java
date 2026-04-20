@@ -8,14 +8,26 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.CorsConfigurationSource;
 
-import java.util.List;
-
+/**
+ * Configuración de seguridad para el microservicio de autenticación.
+ * 
+ * Configura Spring Security con CORS habilitado y endpoints públicos
+ * para autenticación y health checks.
+ * 
+ * @author Sistema de Finanzas Personales
+ * @version 1.0.0
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private final CorsConfigurationSource corsConfigurationSource;
+
+    public SecurityConfig(CorsConfigurationSource corsConfigurationSource) {
+        this.corsConfigurationSource = corsConfigurationSource;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -27,11 +39,15 @@ public class SecurityConfig {
         http
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
+                // Endpoints públicos
                 .requestMatchers("/api/v1/auth/**").permitAll()
                 .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers("/health", "/health/**").permitAll()
+                // Cualquier otra petición requiere autenticación
                 .anyRequest().authenticated()
             )
-            .cors(cors -> cors.disable());
+            // Habilitar CORS con nuestra configuración personalizada
+            .cors(cors -> cors.configurationSource(corsConfigurationSource));
         
         return http.build();
     }
