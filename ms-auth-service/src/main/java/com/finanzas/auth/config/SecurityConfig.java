@@ -8,13 +8,11 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.web.cors.CorsConfigurationSource;
-
 /**
  * Configuración de seguridad para el microservicio de autenticación.
  * 
- * Configura Spring Security con CORS habilitado y endpoints públicos
- * para autenticación y health checks.
+ * Configura Spring Security con endpoints públicos para autenticación 
+ * y health checks. El CORS se maneja a nivel del API Gateway.
  * 
  * @author Sistema de Finanzas Personales
  * @version 1.0.0
@@ -22,12 +20,6 @@ import org.springframework.web.cors.CorsConfigurationSource;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
-    private final CorsConfigurationSource corsConfigurationSource;
-
-    public SecurityConfig(CorsConfigurationSource corsConfigurationSource) {
-        this.corsConfigurationSource = corsConfigurationSource;
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -45,9 +37,7 @@ public class SecurityConfig {
                 .requestMatchers("/health", "/health/**").permitAll()
                 // Cualquier otra petición requiere autenticación
                 .anyRequest().authenticated()
-            )
-            // Habilitar CORS con nuestra configuración personalizada
-            .cors(cors -> cors.configurationSource(corsConfigurationSource));
+            );
         
         return http.build();
     }
