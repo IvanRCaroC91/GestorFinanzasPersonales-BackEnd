@@ -30,6 +30,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
+            .cors(cors -> cors.disable())
             .authorizeHttpRequests(auth -> auth
                 // Endpoints públicos
                 .requestMatchers("/api/v1/auth/**").permitAll()

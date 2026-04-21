@@ -28,7 +28,7 @@ spring:
             allowedHeaders:
               - "*"
             # Permitir credenciales (cookies, authorization headers)
-            allowCredentials: true
+            allowCredentials: false
             # Tiempo de cache para preflight OPTIONS
             maxAge: 3600
       # Configuración de rutas existente
