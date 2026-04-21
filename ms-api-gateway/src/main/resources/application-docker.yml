@@ -11,12 +11,11 @@ spring:
         cors-configurations:
           '[/**]':
             # Orígenes permitidos (frontend local, Vercel y Railway)
-            allowedOrigins:
-              - "https://**.vercel.app"
+            allowedOriginPatterns:
+              - "https://*.vercel.app"
+              - "https://*.railway.app"
               - "http://localhost:5173"
               - "http://127.0.0.1:5173"
-              - "https://**.railway.app"
-              - "*"
             # Métodos HTTP permitidos
             allowedMethods:
               - GET
