@@ -30,20 +30,17 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Orígenes permitidos (producción Vercel y desarrollo local)
-        List<String> allowedOrigins = Arrays.asList(
+        // Patrones de orígenes permitidos (wildcards para Vercel y específicos para local)
+        configuration.setAllowedOriginPatterns(Arrays.asList(
             "http://localhost:5173",
             "http://127.0.0.1:5173",
-            "https://gestor-finanzas-personales-front-gezyi3jbs.vercel.app",
             "https://*.vercel.app"
-        );
+        ));
         
-        // Agregar frontendUrl dinámico si no está ya en la lista
-        if (!allowedOrigins.contains(frontendUrl)) {
-            allowedOrigins.add(frontendUrl);
+        // URL específica del frontend si se proporciona como variable de entorno
+        if (!frontendUrl.equals("http://localhost:5173")) {
+            configuration.addAllowedOrigin(frontendUrl);
         }
-        
-        configuration.setAllowedOrigins(allowedOrigins);
         
         // Métodos HTTP permitidos
         configuration.setAllowedMethods(Arrays.asList(
