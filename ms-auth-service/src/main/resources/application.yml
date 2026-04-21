@@ -1,22 +1,24 @@
 server:
-  port: 8081
+  port: ${PORT:8081}
 
 spring:
   application:
     name: ms-auth-service
   
-  # Configuración de Base de Datos PostgreSQL
+  # Configuración de Base de Datos PostgreSQL compatible con Railway y Local
   datasource:
-    url: jdbc:postgresql://localhost:5432/finanzas_db
-    username: admin
-    password: admin123
+    # Railway: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
+    # Local: jdbc:postgresql://localhost:5432/finanzas_db
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:finanzas_db}}
+    username: ${SPRING_DATASOURCE_USERNAME:${PGUSER:admin}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${PGPASSWORD:admin123}}
     driver-class-name: org.postgresql.Driver
   
   # Configuración JPA
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -32,19 +34,31 @@ spring:
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
     register-with-eureka: true
     fetch-registry: true
   instance:
-    hostname: localhost
-    prefer-ip-address: true
+    hostname: ${RAILWAY_STATIC_URL:localhost}
+    prefer-ip-address: false
+    non-secure-port: ${PORT:8081}
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
 
 logging:
   level:
-    com.finanzas.auth: DEBUG
-    org.springframework.cloud.netflix.eureka: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    com.finanzas.auth: INFO
+    org.springframework.cloud.netflix.eureka: INFO
+    org.hibernate.SQL: WARN
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
 
 # Configuración JWT
 jwt:

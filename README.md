@@ -1166,23 +1166,27 @@ public class AuthService {
 
 #### **CORS Configuration**
 ```yaml
-# application.yml - API Gateway
+# application-docker.yml - API Gateway
 spring:
   cloud:
     gateway:
       globalcors:
         cors-configurations:
           '[/**]':
-            allowedOrigins:
-              - http://localhost:5173
-              - http://127.0.0.1:5173
+            allowedOriginPatterns:
+              - "https://*.vercel.app"
+              - "https://*.railway.app"
+              - "http://localhost:5173"
+              - "http://127.0.0.1:5173"
             allowedMethods:
               - GET, POST, PUT, DELETE, OPTIONS, PATCH
             allowedHeaders:
               - "*"
-            allowCredentials: true
+            allowCredentials: false
             maxAge: 3600
 ```
+
+**Nota importante:** La configuración CORS se maneja únicamente a nivel del API Gateway. Los microservicios individuales tienen CORS deshabilitado para evitar duplicación de headers.
 
 #### **Environment Variables**
 ```bash

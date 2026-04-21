@@ -1,14 +1,17 @@
 server:
-  port: 8083
+  port: ${PORT:8083}
 
 spring:
   application:
     name: ms-finance-service
   
+  # Configuración de Base de Datos PostgreSQL compatible con Railway y Local
   datasource:
-    url: jdbc:postgresql://localhost:5432/finanzas_db
-    username: admin
-    password: admin123
+    # Railway: jdbc:postgresql://${PGHOST}:${PGPORT}/${PGDATABASE}
+    # Local: jdbc:postgresql://localhost:5432/finanzas_db
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://${PGHOST:localhost}:${PGPORT:5432}/${PGDATABASE:finanzas_db}}
+    username: ${SPRING_DATASOURCE_USERNAME:${PGUSER:admin}}
+    password: ${SPRING_DATASOURCE_PASSWORD:${PGPASSWORD:admin123}}
     driver-class-name: org.postgresql.Driver
   
   jpa:
@@ -33,33 +36,34 @@ spring:
 
 logging:
   level:
-    # DEBUG para ver mappings de endpoints
-    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: DEBUG
-    org.springframework.web.servlet.DispatcherServlet: DEBUG
+    # INFO para producción
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: INFO
+    org.springframework.web.servlet.DispatcherServlet: INFO
     
-    # DEBUG para ver carga de beans y contexto
-    org.springframework.beans.factory: DEBUG
-    org.springframework.context: DEBUG
+    # INFO para ver carga de beans y contexto
+    org.springframework.beans.factory: INFO
+    org.springframework.context: INFO
     
-    # DEBUG para ver errores del controller
-    com.finanzas.finance: DEBUG
+    # INFO para ver errores del controller
+    com.finanzas.finance: INFO
     
-    # DEBUG para ver errores de conexión a BD
-    org.springframework.jdbc: DEBUG
-    org.hibernate: DEBUG
-    com.zaxxer.hikari: DEBUG
+    # WARN para ver errores de conexión a BD
+    org.springframework.jdbc: WARN
+    org.hibernate: WARN
+    com.zaxxer.hikari: WARN
 
 # Eureka Client Configuration
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
     register-with-eureka: true
     fetch-registry: true
   
   instance:
-    hostname: localhost
-    prefer-ip-address: true
+    hostname: ${RAILWAY_STATIC_URL:localhost}
+    prefer-ip-address: false
+    non-secure-port: ${PORT:8083}
     lease-renewal-interval-in-seconds: 30
     lease-expiration-duration-in-seconds: 90
 
