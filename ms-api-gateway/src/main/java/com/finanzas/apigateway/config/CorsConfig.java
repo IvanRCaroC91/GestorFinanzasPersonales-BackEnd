@@ -33,6 +33,7 @@ public class CorsConfig {
         List<String> allowedOrigins = Arrays.asList(
             "http://localhost:5173",
             "http://127.0.0.1:5173",
+            "https://gestor-finanzas-personales-front-1nste8xft.vercel.app",
             "https://gestor-finanzas-personales-front-gezyi3jbs.vercel.app",
             "https://*.vercel.app"
         );
