@@ -43,6 +43,26 @@ services:
     depends_on:
       - postgres
 
+  # Config Server
+  config-server:
+    build:
+      context: ./ms-config-server
+      dockerfile: ./Dockerfile
+    container_name: finanzas-config
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8761/eureka/}
+      - CONFIG_SERVER_GIT_URI=file:///config-repo
+    volumes:
+      - ~/config-repo:/config-repo:ro
+    networks:
+      - finanzas-network
+    depends_on:
+      - eureka
+
   # API Gateway
   gateway:
     build:
@@ -55,11 +75,13 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8761/eureka/}
+      - CONFIG_SERVER_URI=http://config-server:8888
       - JWT_SECRET=${JWT_SECRET:-mySecretKey123456789012345678901234567890}
     networks:
       - finanzas-network
     depends_on:
       - eureka
+      - config-server
 
   # Auth Service
   auth-service:
@@ -72,6 +94,7 @@ services:
       - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
+      - CONFIG_SERVER_URI=http://config-server:8888
       - DATABASE_URL=${DATABASE_URL:-jdbc:postgresql://postgres:5432/finanzas_db}
       - DATABASE_USER=${DATABASE_USER:-admin}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD:-admin123}
@@ -83,6 +106,7 @@ services:
     depends_on:
       - postgres
       - eureka
+      - config-server
 
   # Finance Service
   finance-service:
@@ -95,6 +119,7 @@ services:
       - "8083:8083"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
+      - CONFIG_SERVER_URI=http://config-server:8888
       - DATABASE_URL=${DATABASE_URL:-jdbc:postgresql://postgres:5432/finanzas_db}
       - DATABASE_USER=${DATABASE_USER:-admin}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD:-admin123}
@@ -104,6 +129,7 @@ services:
     depends_on:
       - postgres
       - eureka
+      - config-server
 
 # Volumen para persistencia de datos de PostgreSQL
 volumes:

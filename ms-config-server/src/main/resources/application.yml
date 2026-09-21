@@ -1,0 +1,58 @@
+server:
+  port: ${PORT:8888}
+
+spring:
+  application:
+    name: ms-config-server
+  cloud:
+    config:
+      server:
+        git:
+          # URI del repositorio Git donde se almacenará la configuración
+          # Para desarrollo local, usa un repositorio local
+          uri: ${CONFIG_SERVER_GIT_URI:file://${user.home}/config-repo}
+          # Ruta dentro del repositorio donde están los archivos de configuración
+          search-paths: config
+          # Branch a usar
+          default-label: main
+          # Username y password si el repo es privado
+          username: ${CONFIG_SERVER_GIT_USERNAME:}
+          password: ${CONFIG_SERVER_GIT_PASSWORD:}
+          # Tiempo de espera para clonar el repo
+          timeout: 5
+          # Forzar pull del repo al inicio
+          clone-on-start: true
+  # Configuración de seguridad básica (opcional, se puede agregar Spring Security después)
+  security:
+    user:
+      name: ${CONFIG_SERVER_USER:admin}
+      password: ${CONFIG_SERVER_PASSWORD:admin123}
+
+# Eureka Client Configuration
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    hostname: ${RAILWAY_STATIC_URL:localhost}
+    prefer-ip-address: false
+    non-secure-port: ${PORT:8888}
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env,refresh
+  endpoint:
+    health:
+      show-details: when-authorized
+
+logging:
+  level:
+    org.springframework.cloud.config: INFO
+    com.finanzas.config: INFO
