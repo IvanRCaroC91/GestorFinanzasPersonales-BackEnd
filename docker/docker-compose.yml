@@ -19,8 +19,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       # Montar scripts SQL para ejecución automática
-      - ./database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
-      - ./database/test-data.sql:/docker-entrypoint-initdb.d/02-test-data.sql
+      - ../database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+      - ../database/test-data.sql:/docker-entrypoint-initdb.d/02-test-data.sql
     
     # Configuración de red
     networks:
@@ -29,7 +29,7 @@ services:
   # Eureka Service Registry
   eureka:
     build:
-      context: ./ms-service-registry
+      context: ../architecture/ms-service-registry
       dockerfile: ./Dockerfile
     container_name: finanzas-eureka
     restart: unless-stopped
@@ -46,7 +46,7 @@ services:
   # Config Server
   config-server:
     build:
-      context: ./ms-config-server
+      context: ../architecture/ms-config-server
       dockerfile: ./Dockerfile
     container_name: finanzas-config
     restart: unless-stopped
@@ -66,8 +66,8 @@ services:
   # API Gateway
   gateway:
     build:
-      context: .
-      dockerfile: ./ms-api-gateway/Dockerfile
+      context: ../architecture/ms-api-gateway
+      dockerfile: ./Dockerfile
     container_name: finanzas-gateway
     restart: unless-stopped
     ports:
@@ -86,7 +86,7 @@ services:
   # Auth Service
   auth-service:
     build:
-      context: ./ms-auth-service
+      context: ../business/ms-auth-service
       dockerfile: ./Dockerfile
     container_name: finanzas-auth
     restart: unless-stopped
@@ -111,7 +111,7 @@ services:
   # Finance Service
   finance-service:
     build:
-      context: ./ms-finance-service
+      context: ../business/ms-finance-service
       dockerfile: ./Dockerfile
     container_name: finanzas-finance
     restart: unless-stopped
