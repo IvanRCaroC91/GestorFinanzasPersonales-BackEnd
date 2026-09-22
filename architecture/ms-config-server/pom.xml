@@ -9,6 +9,8 @@
         <relativePath>../pom.xml</relativePath>
     </parent>
     <artifactId>ms-config-server</artifactId>
+    <packaging>jar</packaging>
+
     <name>ms-config-server</name>
     <description>Spring Cloud Config Server for centralized configuration</description>
     <dependencies>

@@ -5,9 +5,9 @@
          http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.finanzas</groupId>
     <artifactId>ms-finance-service</artifactId>
-    <version>1.0.0</version>
+    <packaging>jar</packaging>
+
     <name>ms-finance-service</name>
     <description>Microservicio de gestión financiera personal</description>
 
