@@ -56,18 +56,27 @@
         </pluginManagement>
     </build>
 
-    <!--  microservicios -->
+    <!--  microservicios organizados por categoría -->
     <modules>
-        <module>ms-service-registry</module>
-        <module>ms-auth-service</module>
-        <module>ms-api-gateway</module>
-        <module>ms-config-server</module>
+        <!-- Servicios de arquitectura/infraestructura -->
+        <module>architecture/ms-service-registry</module>
+        <module>architecture/ms-api-gateway</module>
+        <module>architecture/ms-config-server</module>
 
-        <!-- futuros -->
+        <!-- Servicios de negocio -->
+        <module>business/ms-auth-service</module>
+        <module>business/ms-finance-service</module>
+
+        <!-- Servicios de soporte (futuros) -->
         <!--
-        <module>ms-user-service</module>
-        <module>ms-finance-service</module>
-        <module>ms-budget-service</module>
+        <module>support/ms-notification-service</module>
+        <module>support/ms-report-service</module>
+        <module>support/ms-audit-service</module>
+        -->
+
+        <!-- Librerías compartidas (futuras) -->
+        <!--
+        <module>shared/ms-common-library</module>
         -->
     </modules>
 
