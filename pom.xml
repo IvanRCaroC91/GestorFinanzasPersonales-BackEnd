@@ -61,6 +61,7 @@
         <module>ms-service-registry</module>
         <module>ms-auth-service</module>
         <module>ms-api-gateway</module>
+        <module>ms-config-server</module>
 
         <!-- futuros -->
         <!--
