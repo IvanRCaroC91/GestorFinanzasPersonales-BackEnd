@@ -9,8 +9,8 @@ spring:
       server:
         git:
           # URI del repositorio Git donde se almacenará la configuración
-          # Para desarrollo local, usa un repositorio local
-          uri: ${CONFIG_SERVER_GIT_URI:file://${user.home}/config-repo}
+          # Para desarrollo local, usa el directorio config/ del proyecto
+          uri: ${CONFIG_SERVER_GIT_URI:file:./config}
           # Ruta dentro del repositorio donde están los archivos de configuración
           search-paths: config
           # Branch a usar

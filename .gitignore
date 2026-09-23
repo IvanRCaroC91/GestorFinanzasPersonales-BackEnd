@@ -21,3 +21,6 @@ Thumbs.db
 
 # Spring Boot
 spring.log
+
+# Config repository (Git submodule)
+config/.git/
