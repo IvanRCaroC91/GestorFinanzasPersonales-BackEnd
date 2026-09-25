@@ -47,8 +47,7 @@ spring:
 eureka:
   client:
     service-url:
-      # AJUSTAR: qa-eureka debe ser el hostname real del Eureka QA
-      defaultZone: http://qa-eureka:8765/eureka
+      defaultZone: ${EUREKA_URL}
     register-with-eureka: true
     fetch-registry: true
   instance:

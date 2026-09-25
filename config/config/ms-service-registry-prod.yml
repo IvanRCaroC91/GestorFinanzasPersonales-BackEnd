@@ -14,7 +14,7 @@ eureka:
     register-with-eureka: false
     fetch-registry: false
     service-url:
-      defaultZone: http://prod-eureka:8765/eureka
+      defaultZone: ${EUREKA_URL}
   server:
     enable-self-preservation: true
     eviction-interval-timer-in-ms: 5000

@@ -48,8 +48,7 @@ spring:
 eureka:
   client:
     service-url:
-      # AJUSTAR: prod-eureka debe ser el hostname real del Eureka Producción
-      defaultZone: http://prod-eureka:8765/eureka
+      defaultZone: ${EUREKA_URL}
     register-with-eureka: true
     fetch-registry: true
   instance:

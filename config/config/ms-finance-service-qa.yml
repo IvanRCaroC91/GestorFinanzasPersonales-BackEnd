@@ -1,9 +1,8 @@
 # Configuración para ambiente QA
 # NOTA: Este ambiente aún no existe. Ajustar los siguientes valores cuando se cree:
-# - qa-db-host: Reemplazar con el hostname real de la base de datos QA
-# - ${DB_USERNAME}: Variable de entorno con el usuario de base de datos QA
-# - ${DB_PASSWORD}: Variable de entorno con la contraseña de base de datos QA
-# - qa-eureka: Reemplazar con el hostname real del Eureka QA
+# - DATABASE_URL: URL de la base de datos de QA
+# - DATABASE_USER y DATABASE_PASSWORD: credenciales de la base de datos
+# - EUREKA_URL: URL del Eureka de QA
 
 server:
   port: 8083
@@ -13,10 +12,9 @@ spring:
     name: ms-finance-service
 
   datasource:
-    # AJUSTAR: qa-db-host debe ser el hostname real de la base de datos QA
-    url: jdbc:postgresql://qa-db-host:5432/finanzas_db
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
   
   jpa:
@@ -51,8 +49,7 @@ logging:
 eureka:
   client:
     service-url:
-      # AJUSTAR: qa-eureka debe ser el hostname real del Eureka QA
-      defaultZone: http://qa-eureka:8765/eureka
+      defaultZone: ${EUREKA_URL}
     register-with-eureka: true
     fetch-registry: true
   

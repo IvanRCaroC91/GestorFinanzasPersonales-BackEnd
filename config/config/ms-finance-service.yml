@@ -47,7 +47,7 @@ logging:
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:8765/eureka}
+      defaultZone: ${EUREKA_URL}
     register-with-eureka: true
     fetch-registry: true
   
