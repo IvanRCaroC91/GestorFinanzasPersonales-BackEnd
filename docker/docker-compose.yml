@@ -114,8 +114,6 @@ services:
       dockerfile: business/ms-auth-service/Dockerfile
     container_name: finanzas-auth
     restart: unless-stopped
-    ports:
-      - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
       - CONFIG_SERVER_URI=http://config-server:8890
@@ -147,8 +145,6 @@ services:
       dockerfile: business/ms-finance-service/Dockerfile
     container_name: finanzas-finance
     restart: unless-stopped
-    ports:
-      - "8083:8083"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
       - CONFIG_SERVER_URI=http://config-server:8890
