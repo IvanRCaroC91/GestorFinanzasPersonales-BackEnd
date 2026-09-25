@@ -10,7 +10,7 @@ spring:
     config:
       server:
         native:
-          search-locations: ${CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS:file:./config/config}
+          search-locations: ${CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS:file:/app/config/config}
   # Configuración de seguridad básica (opcional, se puede agregar Spring Security después)
   security:
     user:
