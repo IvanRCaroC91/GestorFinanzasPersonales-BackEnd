@@ -67,6 +67,8 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8765/eureka/}
       - CONFIG_SERVER_GIT_URI=file:///config-repo
+      - CONFIG_SERVER_USER=${CONFIG_SERVER_USER:-admin}
+      - CONFIG_SERVER_PASSWORD=${CONFIG_SERVER_PASSWORD:-admin123}
     volumes:
       - ~/config-repo:/config-repo
     networks:
@@ -75,7 +77,7 @@ services:
       eureka:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:8890/actuator/info"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8890/actuator/health | grep -q 'UP'"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -93,6 +95,8 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8765/eureka/}
       - CONFIG_SERVER_URI=http://config-server:8890
+      - CONFIG_SERVER_USERNAME=${CONFIG_SERVER_USER:-admin}
+      - CONFIG_SERVER_PASSWORD=${CONFIG_SERVER_PASSWORD:-admin123}
       - JWT_SECRET=${JWT_SECRET:-mySecretKey123456789012345678901234567890}
     networks:
       - finanzas-network
@@ -117,6 +121,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
       - CONFIG_SERVER_URI=http://config-server:8890
+      - CONFIG_SERVER_USERNAME=${CONFIG_SERVER_USER:-admin}
+      - CONFIG_SERVER_PASSWORD=${CONFIG_SERVER_PASSWORD:-admin123}
       - DATABASE_URL=${DATABASE_URL:-jdbc:postgresql://postgres:5432/finanzas_db}
       - DATABASE_USER=${DATABASE_USER:-admin}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD:-admin123}
@@ -148,6 +154,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
       - CONFIG_SERVER_URI=http://config-server:8890
+      - CONFIG_SERVER_USERNAME=${CONFIG_SERVER_USER:-admin}
+      - CONFIG_SERVER_PASSWORD=${CONFIG_SERVER_PASSWORD:-admin123}
       - DATABASE_URL=${DATABASE_URL:-jdbc:postgresql://postgres:5432/finanzas_db}
       - DATABASE_USER=${DATABASE_USER:-admin}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD:-admin123}
