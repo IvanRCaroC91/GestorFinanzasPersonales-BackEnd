@@ -17,7 +17,7 @@ public class JwtUtil {
 
     // Secreto utilizado para firmar los tokens JWT.
     // Debe ser el mismo en todos los microservicios del sistema.
-    @Value("${jwt.secret:mySecretKey123456789012345678901234567890}")
+    @Value("${jwt.secret}")
     private String secret;
 
     // Tiempo de expiración del token en milisegundos (default: 24 horas).

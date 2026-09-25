@@ -31,7 +31,7 @@ public class UserValidationInterceptor implements HandlerInterceptor {
     private static final String USER_ID_HEADER = "X-User-Id";
     private static final String AUTHORIZATION_HEADER = "Authorization";
 
-    @Value("${jwt.secret:mySecretKey123456789012345678901234567890}")
+    @Value("${jwt.secret}")
     private String jwtSecret;
 
     @Override

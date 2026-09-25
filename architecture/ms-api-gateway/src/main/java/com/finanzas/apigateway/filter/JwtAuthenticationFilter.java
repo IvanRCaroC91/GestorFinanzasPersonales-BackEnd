@@ -24,8 +24,7 @@ import java.util.List;
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     // Secreto utilizado para firmar y validar los tokens JWT.
-    // Se obtiene desde las variables de entorno o usa el valor por defecto.
-    @Value("${jwt.secret:mySecretKey123456789012345678901234567890}")
+    @Value("${jwt.secret}")
     private String secret;
 
     // Lista de rutas que no requieren autenticación.
