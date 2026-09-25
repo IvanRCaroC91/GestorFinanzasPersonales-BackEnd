@@ -151,6 +151,7 @@ services:
       - DATABASE_URL=${DATABASE_URL:-jdbc:postgresql://postgres:5432/finanzas_db}
       - DATABASE_USER=${DATABASE_USER:-admin}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD:-admin123}
+      - JWT_SECRET=${JWT_SECRET:-mySecretKey123456789012345678901234567890}
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8765/eureka/}
     networks:
       - finanzas-network
