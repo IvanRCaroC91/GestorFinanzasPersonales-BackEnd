@@ -10,7 +10,7 @@ Multi-module Maven project implementing a personal finance manager backend using
 
 | Module | Port | Purpose |
 |---|---|---|
-| `ms-service-registry` | 8761 | Eureka service discovery |
+| `ms-service-registry` | 8765 | Eureka service discovery |
 | `ms-api-gateway` | 8080 | API Gateway (Spring Cloud Gateway / WebFlux) — routing, CORS, JWT filter |
 | `ms-auth-service` | 8081 | Authentication — JWT generation, BCrypt password hashing |
 | `ms-finance-service` | 8083 | Finance domain — movements, budgets, categories, merchants |
@@ -25,13 +25,13 @@ mvn clean package -DskipTests
 mvn test
 
 # Run a specific test class
-mvn test -Dtest=AuthServiceTest -pl ms-auth-service
+mvn test -Dtest=AuthServiceTest -pl business/ms-auth-service
 
 # Run a single module
-mvn spring-boot:run -pl ms-service-registry
-mvn spring-boot:run -pl ms-api-gateway
-mvn spring-boot:run -pl ms-auth-service
-mvn spring-boot:run -pl ms-finance-service
+mvn spring-boot:run -pl architecture/ms-service-registry
+mvn spring-boot:run -pl architecture/ms-api-gateway
+mvn spring-boot:run -pl business/ms-auth-service
+mvn spring-boot:run -pl business/ms-finance-service
 ```
 
 ## Local Development with Docker
@@ -57,7 +57,7 @@ Startup order matters: postgres → eureka → gateway → auth-service / financ
 ```
 Client → API Gateway (8080) → [Auth Service | Finance Service]
                 ↕ (service discovery)
-          Service Registry (8761 / Eureka)
+          Service Registry (8765 / Eureka)
                 ↕
            PostgreSQL (5432)
 ```

@@ -21,3 +21,6 @@ Thumbs.db
 
 # Spring Boot
 spring.log
+
+# Documentation generated locally
+**/README*

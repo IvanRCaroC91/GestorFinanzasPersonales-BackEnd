@@ -1,5 +1,5 @@
 server:
-  port: ${PORT:8761}
+  port: ${PORT:8765}
 
 spring:
   application:
@@ -8,7 +8,7 @@ spring:
 eureka:
   instance:
     hostname: ${RAILWAY_PUBLIC_DOMAIN:localhost}
-    non-secure-port: ${PORT:8761}
+    non-secure-port: ${PORT:8765}
     prefer-ip-address: false
   client:
     register-with-eureka: false
