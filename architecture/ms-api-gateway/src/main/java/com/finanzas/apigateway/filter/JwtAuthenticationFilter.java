@@ -24,8 +24,7 @@ import java.util.List;
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
     // Secreto utilizado para firmar y validar los tokens JWT.
-    // Se obtiene desde las variables de entorno o usa el valor por defecto.
-    @Value("${jwt.secret:mySecretKey123456789012345678901234567890}")
+    @Value("${jwt.secret}")
     private String secret;
 
     // Lista de rutas que no requieren autenticación.
@@ -39,15 +38,23 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     // Valida el token JWT y agrega información del usuario a los headers.
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        String path = exchange.getRequest().getURI().getPath();
+        ServerWebExchange sanitizedExchange = exchange.mutate()
+                .request(exchange.getRequest().mutate()
+                        .headers(headers -> {
+                            headers.remove("X-User-Id");
+                            headers.remove("X-User-Username");
+                        })
+                        .build())
+                .build();
+        String path = sanitizedExchange.getRequest().getURI().getPath();
 
         // Permitir rutas de autenticación sin token
         if (isExcludedPath(path)) {
-            return chain.filter(exchange);
+            return chain.filter(sanitizedExchange);
         }
 
         // Validar token para las demás rutas
-        String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
+        String authHeader = sanitizedExchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return handleUnauthorized(exchange);
@@ -62,8 +69,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
                 String username = extractUsername(token);
                 
                 // Agregar información del usuario al request para que los microservicios la usen
-                return chain.filter(exchange.mutate()
-                        .request(exchange.getRequest().mutate()
+                return chain.filter(sanitizedExchange.mutate()
+                        .request(sanitizedExchange.getRequest().mutate()
                                 .header("X-User-Id", userId)           // ← CLAVE: UUID del usuario
                                 .header("X-User-Username", username)   // ← Username adicional
                                 .build())

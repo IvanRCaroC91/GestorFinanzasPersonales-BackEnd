@@ -6,10 +6,9 @@ services:
     
     # Variables de entorno para la base de datos
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-finanzas_db}
-      POSTGRES_USER: ${POSTGRES_USER:-admin}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin123}
-      POSTGRES_HOST_AUTH_METHOD: trust
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB es obligatorio}
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER es obligatorio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD es obligatorio}
     
     # Exponer puerto para conexión local
     ports:
@@ -67,6 +66,8 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8765/eureka/}
       - CONFIG_SERVER_GIT_URI=file:///config-repo
+      - CONFIG_SERVER_USER=${CONFIG_SERVER_USER:?CONFIG_SERVER_USER es obligatorio}
+      - CONFIG_SERVER_PASSWORD=${CONFIG_SERVER_PASSWORD:?CONFIG_SERVER_PASSWORD es obligatorio}
     volumes:
       - ~/config-repo:/config-repo
     networks:
@@ -75,7 +76,7 @@ services:
       eureka:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:8890/actuator/info"]
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8890/actuator/health | grep -q 'UP'"]
       interval: 10s
       timeout: 5s
       retries: 12
@@ -93,7 +94,9 @@ services:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8765/eureka/}
       - CONFIG_SERVER_URI=http://config-server:8890
-      - JWT_SECRET=${JWT_SECRET:-mySecretKey123456789012345678901234567890}
+      - CONFIG_SERVER_USERNAME=${CONFIG_SERVER_USER:?CONFIG_SERVER_USER es obligatorio}
+      - CONFIG_SERVER_PASSWORD=${CONFIG_SERVER_PASSWORD:?CONFIG_SERVER_PASSWORD es obligatorio}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET es obligatorio}
     networks:
       - finanzas-network
     depends_on:
@@ -114,15 +117,15 @@ services:
       dockerfile: business/ms-auth-service/Dockerfile
     container_name: finanzas-auth
     restart: unless-stopped
-    ports:
-      - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
       - CONFIG_SERVER_URI=http://config-server:8890
-      - DATABASE_URL=${DATABASE_URL:-jdbc:postgresql://postgres:5432/finanzas_db}
-      - DATABASE_USER=${DATABASE_USER:-admin}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-admin123}
-      - JWT_SECRET=${JWT_SECRET:-mySecretKey123456789012345678901234567890}
+      - CONFIG_SERVER_USERNAME=${CONFIG_SERVER_USER:?CONFIG_SERVER_USER es obligatorio}
+      - CONFIG_SERVER_PASSWORD=${CONFIG_SERVER_PASSWORD:?CONFIG_SERVER_PASSWORD es obligatorio}
+      - DATABASE_URL=${DATABASE_URL:?DATABASE_URL es obligatorio}
+      - DATABASE_USER=${DATABASE_USER:?DATABASE_USER es obligatorio}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:?DATABASE_PASSWORD es obligatorio}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET es obligatorio}
       - JWT_EXPIRATION=${JWT_EXPIRATION:-86400000}
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8765/eureka/}
     networks:
@@ -147,14 +150,15 @@ services:
       dockerfile: business/ms-finance-service/Dockerfile
     container_name: finanzas-finance
     restart: unless-stopped
-    ports:
-      - "8083:8083"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
       - CONFIG_SERVER_URI=http://config-server:8890
-      - DATABASE_URL=${DATABASE_URL:-jdbc:postgresql://postgres:5432/finanzas_db}
-      - DATABASE_USER=${DATABASE_USER:-admin}
-      - DATABASE_PASSWORD=${DATABASE_PASSWORD:-admin123}
+      - CONFIG_SERVER_USERNAME=${CONFIG_SERVER_USER:?CONFIG_SERVER_USER es obligatorio}
+      - CONFIG_SERVER_PASSWORD=${CONFIG_SERVER_PASSWORD:?CONFIG_SERVER_PASSWORD es obligatorio}
+      - DATABASE_URL=${DATABASE_URL:?DATABASE_URL es obligatorio}
+      - DATABASE_USER=${DATABASE_USER:?DATABASE_USER es obligatorio}
+      - DATABASE_PASSWORD=${DATABASE_PASSWORD:?DATABASE_PASSWORD es obligatorio}
+      - JWT_SECRET=${JWT_SECRET:?JWT_SECRET es obligatorio}
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8765/eureka/}
     networks:
       - finanzas-network

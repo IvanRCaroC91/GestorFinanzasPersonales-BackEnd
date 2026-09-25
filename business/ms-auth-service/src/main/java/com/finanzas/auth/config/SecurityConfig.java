@@ -8,11 +8,12 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 /**
  * Configuración de seguridad para el microservicio de autenticación.
  * 
- * Configura Spring Security con endpoints públicos para autenticación 
- * y health checks. El CORS se maneja a nivel del API Gateway.
+ * Configura Spring Security con login y registro públicos.
+ * El CORS se maneja a nivel del API Gateway.
  * 
  * @author Sistema de Finanzas Personales
  * @version 1.0.0
@@ -32,10 +33,8 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.disable())
             .authorizeHttpRequests(auth -> auth
-                // Endpoints públicos
-                .requestMatchers("/api/v1/auth/**").permitAll()
-                .requestMatchers("/actuator/**").permitAll()
-                .requestMatchers("/health", "/health/**").permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/v1/auth/login", "POST")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/v1/auth/register", "POST")).permitAll()
                 // Cualquier otra petición requiere autenticación
                 .anyRequest().authenticated()
             );

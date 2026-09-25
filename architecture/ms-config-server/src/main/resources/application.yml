@@ -25,8 +25,8 @@ spring:
   # Configuración de seguridad básica (opcional, se puede agregar Spring Security después)
   security:
     user:
-      name: ${CONFIG_SERVER_USER:admin}
-      password: ${CONFIG_SERVER_PASSWORD:admin123}
+      name: ${CONFIG_SERVER_USER}
+      password: ${CONFIG_SERVER_PASSWORD}
 
 # Eureka Client Configuration
 eureka:
@@ -47,7 +47,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,env,refresh
+        include: health
   endpoint:
     health:
       show-details: when-authorized

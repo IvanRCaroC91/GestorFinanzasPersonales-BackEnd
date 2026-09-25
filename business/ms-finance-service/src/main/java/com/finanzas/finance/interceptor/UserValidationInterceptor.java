@@ -1,6 +1,9 @@
 package com.finanzas.finance.interceptor;
 
-import com.finanzas.finance.exception.ValidationException;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -8,6 +11,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import javax.crypto.SecretKey;
 import java.util.UUID;
 
 /**
@@ -25,6 +29,10 @@ public class UserValidationInterceptor implements HandlerInterceptor {
     private static final Logger log = LoggerFactory.getLogger(UserValidationInterceptor.class);
 
     private static final String USER_ID_HEADER = "X-User-Id";
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
@@ -37,20 +45,33 @@ public class UserValidationInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        // Obtener el header X-User-Id
+        String authorizationHeader = request.getHeader(AUTHORIZATION_HEADER);
         String userIdHeader = request.getHeader(USER_ID_HEADER);
-        
-        // Validar que el header esté presente
+
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token JWT ausente o inválido");
+            return false;
+        }
+
         if (userIdHeader == null || userIdHeader.trim().isEmpty()) {
             log.warn("Request sin header {}: {} {} - IP: {}", 
                     USER_ID_HEADER, method, path, getClientIpAddress(request));
-            
-            throw new ValidationException("El header " + USER_ID_HEADER + " es obligatorio");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Identidad de usuario ausente");
+            return false;
         }
 
-        // Validar que sea un UUID válido
         try {
             UUID userId = UUID.fromString(userIdHeader.trim());
+            Claims claims = parseToken(authorizationHeader.substring(7));
+            String tokenUserId = claims.get("userId", String.class);
+
+            if (!userId.toString().equals(tokenUserId)) {
+                log.warn("El usuario del token no coincide con {}: {} {} - IP: {}",
+                        USER_ID_HEADER, method, path, getClientIpAddress(request));
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Identidad de usuario no coincide con el token");
+                return false;
+            }
+
             log.debug("Request validado - Usuario: {} {} {} - IP: {}", 
                     userId, method, path, getClientIpAddress(request));
             return true;
@@ -59,8 +80,23 @@ public class UserValidationInterceptor implements HandlerInterceptor {
             log.warn("Request con {} inválido: {} {} - Valor: {} - IP: {}", 
                     USER_ID_HEADER, method, path, userIdHeader, getClientIpAddress(request));
             
-            throw new ValidationException("El header " + USER_ID_HEADER + " debe ser un UUID válido");
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Identidad de usuario inválida");
+            return false;
+        } catch (Exception e) {
+            log.warn("Request con token JWT inválido: {} {} - IP: {}",
+                    method, path, getClientIpAddress(request));
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token JWT inválido o expirado");
+            return false;
         }
+    }
+
+    private Claims parseToken(String token) {
+        SecretKey signingKey = Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        return Jwts.parser()
+                .verifyWith(signingKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     /**
