@@ -21,6 +21,11 @@ services:
       # Montar scripts SQL para ejecución automática
       - ../database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
       - ../database/test-data.sql:/docker-entrypoint-initdb.d/02-test-data.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
     
     # Configuración de red
     networks:
@@ -29,107 +34,142 @@ services:
   # Eureka Service Registry
   eureka:
     build:
-      context: ../architecture/ms-service-registry
-      dockerfile: ./Dockerfile
+      context: ..
+      dockerfile: architecture/ms-service-registry/Dockerfile
     container_name: finanzas-eureka
     restart: unless-stopped
     ports:
-      - "8761:8761"
+      - "8765:8765"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8761/eureka/}
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8765/eureka/}
     networks:
       - finanzas-network
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8765/actuator/health | grep -q 'UP'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 
   # Config Server
   config-server:
     build:
-      context: ../architecture/ms-config-server
-      dockerfile: ./Dockerfile
+      context: ..
+      dockerfile: architecture/ms-config-server/Dockerfile
     container_name: finanzas-config
     restart: unless-stopped
     ports:
-      - "8888:8888"
+      - "8890:8890"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8761/eureka/}
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8765/eureka/}
       - CONFIG_SERVER_GIT_URI=file:///config-repo
     volumes:
-      - ~/config-repo:/config-repo:ro
+      - ~/config-repo:/config-repo
     networks:
       - finanzas-network
     depends_on:
-      - eureka
+      eureka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8890/actuator/info"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 
   # API Gateway
   gateway:
     build:
-      context: ../architecture/ms-api-gateway
-      dockerfile: ./Dockerfile
+      context: ..
+      dockerfile: architecture/ms-api-gateway/Dockerfile
     container_name: finanzas-gateway
     restart: unless-stopped
     ports:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8761/eureka/}
-      - CONFIG_SERVER_URI=http://config-server:8888
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8765/eureka/}
+      - CONFIG_SERVER_URI=http://config-server:8890
       - JWT_SECRET=${JWT_SECRET:-mySecretKey123456789012345678901234567890}
     networks:
       - finanzas-network
     depends_on:
-      - eureka
-      - config-server
+      eureka:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health | grep -q 'UP'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 
   # Auth Service
   auth-service:
     build:
-      context: ../business/ms-auth-service
-      dockerfile: ./Dockerfile
+      context: ..
+      dockerfile: business/ms-auth-service/Dockerfile
     container_name: finanzas-auth
     restart: unless-stopped
     ports:
       - "8081:8081"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
-      - CONFIG_SERVER_URI=http://config-server:8888
+      - CONFIG_SERVER_URI=http://config-server:8890
       - DATABASE_URL=${DATABASE_URL:-jdbc:postgresql://postgres:5432/finanzas_db}
       - DATABASE_USER=${DATABASE_USER:-admin}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD:-admin123}
       - JWT_SECRET=${JWT_SECRET:-mySecretKey123456789012345678901234567890}
       - JWT_EXPIRATION=${JWT_EXPIRATION:-86400000}
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8761/eureka/}
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8765/eureka/}
     networks:
       - finanzas-network
     depends_on:
-      - postgres
-      - eureka
-      - config-server
+      postgres:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8081/actuator/health 2>&1 | grep -q 'UP\\|403'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 
   # Finance Service
   finance-service:
     build:
-      context: ../business/ms-finance-service
-      dockerfile: ./Dockerfile
+      context: ..
+      dockerfile: business/ms-finance-service/Dockerfile
     container_name: finanzas-finance
     restart: unless-stopped
     ports:
       - "8083:8083"
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
-      - CONFIG_SERVER_URI=http://config-server:8888
+      - CONFIG_SERVER_URI=http://config-server:8890
       - DATABASE_URL=${DATABASE_URL:-jdbc:postgresql://postgres:5432/finanzas_db}
       - DATABASE_USER=${DATABASE_USER:-admin}
       - DATABASE_PASSWORD=${DATABASE_PASSWORD:-admin123}
-      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8761/eureka/}
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8765/eureka/}
     networks:
       - finanzas-network
     depends_on:
-      - postgres
-      - eureka
-      - config-server
+      postgres:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8083/actuator/health | grep -q 'UP'"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
 
 # Volumen para persistencia de datos de PostgreSQL
 volumes:
