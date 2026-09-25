@@ -1,0 +1,73 @@
+# Configuración para ambiente Producción
+# NOTA: Este ambiente aún no existe. Ajustar los siguientes valores cuando se cree:
+# - prod-db-host: Reemplazar con el hostname real de la base de datos Producción
+# - ${DB_USERNAME}: Variable de entorno con el usuario de base de datos Producción
+# - ${DB_PASSWORD}: Variable de entorno con la contraseña de base de datos Producción
+# - prod-eureka: Reemplazar con el hostname real del Eureka Producción
+
+server:
+  port: 8083
+
+spring:
+  application:
+    name: ms-finance-service
+
+  datasource:
+    # AJUSTAR: prod-db-host debe ser el hostname real de la base de datos Producción
+    url: jdbc:postgresql://prod-db-host:5432/finanzas_db
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  
+  jackson:
+    default-property-inclusion: non_null
+
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+
+logging:
+  level:
+    org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping: WARN
+    org.springframework.web.servlet.DispatcherServlet: WARN
+    org.springframework.beans.factory: WARN
+    org.springframework.context: WARN
+    com.finanzas.finance: WARN
+    org.springframework.jdbc: WARN
+    org.hibernate: WARN
+    com.zaxxer.hikari: WARN
+
+eureka:
+  client:
+    service-url:
+      # AJUSTAR: prod-eureka debe ser el hostname real del Eureka Producción
+      defaultZone: http://prod-eureka:8765/eureka
+    register-with-eureka: true
+    fetch-registry: true
+  
+  instance:
+    hostname: ${HOSTNAME}
+    prefer-ip-address: false
+    non-secure-port: 8083
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics
+  endpoint:
+    health:
+      show-details: never

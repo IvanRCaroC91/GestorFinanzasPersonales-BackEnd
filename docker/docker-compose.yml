@@ -63,13 +63,13 @@ services:
     ports:
       - "8890:8890"
     environment:
-      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE:-docker}
+      - SPRING_PROFILES_ACTIVE=${CONFIG_SERVER_SPRING_PROFILES_ACTIVE:-docker,native}
+      - CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS=file:/config/config
       - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=${EUREKA_URL:-http://eureka:8765/eureka/}
-      - CONFIG_SERVER_GIT_URI=file:///config-repo
       - CONFIG_SERVER_USER=${CONFIG_SERVER_USER:?CONFIG_SERVER_USER es obligatorio}
       - CONFIG_SERVER_PASSWORD=${CONFIG_SERVER_PASSWORD:?CONFIG_SERVER_PASSWORD es obligatorio}
     volumes:
-      - ~/config-repo:/config-repo
+      - ../config:/config:ro
     networks:
       - finanzas-network
     depends_on:

@@ -1,0 +1,69 @@
+# Configuración para ambiente QA
+# NOTA: Este ambiente aún no existe. Ajustar los siguientes valores cuando se cree:
+# - qa-db-host: Reemplazar con el hostname real de la base de datos QA
+# - ${DB_USERNAME}: Variable de entorno con el usuario de base de datos QA
+# - ${DB_PASSWORD}: Variable de entorno con la contraseña de base de datos QA
+# - qa-eureka: Reemplazar con el hostname real del Eureka QA
+# - ${JWT_SECRET}: Variable de entorno con el secreto JWT para QA
+
+server:
+  port: 8081
+
+spring:
+  application:
+    name: ms-auth-service
+
+  datasource:
+    # AJUSTAR: qa-db-host debe ser el hostname real de la base de datos QA
+    url: jdbc:postgresql://qa-db-host:5432/finanzas_db
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    open-in-view: false
+  
+  data:
+    jpa:
+      repositories:
+        enabled: true
+
+eureka:
+  client:
+    service-url:
+      # AJUSTAR: qa-eureka debe ser el hostname real del Eureka QA
+      defaultZone: http://qa-eureka:8765/eureka
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    hostname: ${HOSTNAME}
+    prefer-ip-address: false
+    non-secure-port: 8081
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+
+logging:
+  level:
+    com.finanzas.auth: INFO
+    org.springframework.cloud.netflix.eureka: INFO
+    org.hibernate.SQL: WARN
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+jwt:
+  secret: ${JWT_SECRET}
+  expiration: 86400000

@@ -1,0 +1,34 @@
+server:
+  port: 8765
+
+spring:
+  application:
+    name: ms-service-registry
+
+eureka:
+  instance:
+    hostname: ${HOSTNAME}
+    non-secure-port: 8765
+    prefer-ip-address: false
+  client:
+    register-with-eureka: false
+    fetch-registry: false
+    service-url:
+      defaultZone: http://prod-eureka:8765/eureka
+  server:
+    enable-self-preservation: true
+    eviction-interval-timer-in-ms: 5000
+
+logging:
+  level:
+    com.netflix.eureka: WARN
+    com.netflix.discovery: WARN
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics
+  endpoint:
+    health:
+      show-details: never
