@@ -6,7 +6,7 @@ spring:
     name: ms-finance-service
   
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://postgres:5432/finanzas_db}
+    url: ${DATABASE_URL}
     username: ${DATABASE_USER}
     password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
