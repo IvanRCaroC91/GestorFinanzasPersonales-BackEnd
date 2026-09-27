@@ -17,9 +17,6 @@ services:
     # Volumen para persistencia de datos
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      # Montar scripts SQL para ejecución automática
-      - ../database/init.sql:/docker-entrypoint-initdb.d/01-init.sql
-      - ../database/test-data.sql:/docker-entrypoint-initdb.d/02-test-data.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
