@@ -2,26 +2,15 @@ server:
   port: ${PORT:8890}
 
 spring:
+  profiles:
+    active: native
   application:
     name: ms-config-server
   cloud:
     config:
       server:
-        git:
-          # URI del repositorio Git donde se almacenará la configuración
-          # Para desarrollo local, usa un repositorio local
-          uri: ${CONFIG_SERVER_GIT_URI:file://${user.home}/config-repo}
-          # Ruta dentro del repositorio donde están los archivos de configuración
-          search-paths: config
-          # Branch a usar
-          default-label: main
-          # Username y password si el repo es privado
-          username: ${CONFIG_SERVER_GIT_USERNAME:}
-          password: ${CONFIG_SERVER_GIT_PASSWORD:}
-          # Tiempo de espera para clonar el repo
-          timeout: 5
-          # Forzar pull del repo al inicio
-          clone-on-start: true
+        native:
+          search-locations: ${CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS:file:/app/config/config}
   # Configuración de seguridad básica (opcional, se puede agregar Spring Security después)
   security:
     user:

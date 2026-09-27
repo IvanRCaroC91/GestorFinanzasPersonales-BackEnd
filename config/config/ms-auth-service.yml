@@ -1,5 +1,5 @@
 server:
-  port: ${AUTH_PORT:8081}
+  port: ${PORT:8081}
 
 spring:
   application:
@@ -36,8 +36,9 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
   instance:
-    hostname: ${RAILWAY_PUBLIC_DOMAIN:auth-service}
+    hostname: ${RAILWAY_STATIC_URL:localhost}
     prefer-ip-address: false
+    non-secure-port: ${PORT:8081}
     lease-renewal-interval-in-seconds: 30
     lease-expiration-duration-in-seconds: 90
 
