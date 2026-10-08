@@ -2,6 +2,8 @@ package com.finanzas.finance.repository;
 
 import com.finanzas.finance.entity.Movimiento;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -79,12 +81,12 @@ public interface MovimientoRepository extends JpaRepository<Movimiento, UUID> {
     /**
      * Lista movimientos de un usuario ordenados por fecha descendente.
      */
-    List<Movimiento> findByUserIdOrderByFechaDesc(UUID userId);
+    Page<Movimiento> findByUserIdOrderByFechaDesc(UUID userId, Pageable pageable);
 
     /**
      * Lista movimientos de un usuario por tipo ordenados por fecha descendente.
      */
-    List<Movimiento> findByUserIdAndTipoOrderByFechaDesc(UUID userId, Movimiento.TipoMovimiento tipo);
+    Page<Movimiento> findByUserIdAndTipoOrderByFechaDesc(UUID userId, Movimiento.TipoMovimiento tipo, Pageable pageable);
 
     /**
      * Cuenta movimientos de una categoría para un usuario.

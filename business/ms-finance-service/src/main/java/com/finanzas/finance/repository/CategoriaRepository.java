@@ -2,6 +2,8 @@ package com.finanzas.finance.repository;
 
 import com.finanzas.finance.entity.Categoria;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -78,12 +80,12 @@ public interface CategoriaRepository extends JpaRepository<Categoria, UUID> {
     /**
      * Busca categorías de un usuario ordenadas por nombre.
      */
-    List<Categoria> findByUserIdOrderByNombreAsc(UUID userId);
+    Page<Categoria> findByUserIdOrderByNombreAsc(UUID userId, Pageable pageable);
 
     /**
      * Busca categorías de un usuario por tipo ordenadas por nombre.
      */
-    List<Categoria> findByUserIdAndTipoOrderByNombreAsc(UUID userId, Categoria.TipoMovimiento tipo);
+    Page<Categoria> findByUserIdAndTipoOrderByNombreAsc(UUID userId, Categoria.TipoMovimiento tipo, Pageable pageable);
 
     /**
      * Verifica si existe una categoría con el mismo nombre para el mismo usuario, excluyendo un ID específico.

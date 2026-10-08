@@ -24,3 +24,4 @@ spring.log
 
 # Markdown documentation generated locally
 **/*.md
+!ANALISIS-COPILOT.md

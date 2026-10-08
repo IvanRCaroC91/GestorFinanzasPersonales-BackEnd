@@ -3,6 +3,7 @@ package com.finanzas.finance.controller;
 import com.finanzas.finance.dto.ApiResponse;
 import com.finanzas.finance.dto.PresupuestoRequest;
 import com.finanzas.finance.dto.PresupuestoResponse;
+import com.finanzas.finance.dto.PageResponse;
 import com.finanzas.finance.dto.PresupuestoEjecucionResponse;
 import com.finanzas.finance.service.PresupuestoService;
 import jakarta.validation.Valid;
@@ -11,6 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -69,14 +73,17 @@ public class PresupuestoController {
     // Recibe el ID del usuario desde el header, consulta al service
     // y retorna la lista de presupuestos desde la base de datos.
     @GetMapping
-    public ResponseEntity<ApiResponse<List<PresupuestoResponse>>> listarPresupuestos(
-            @RequestHeader("X-User-Id") UUID userId) {
+    public ResponseEntity<ApiResponse<PageResponse<PresupuestoResponse>>> listarPresupuestos(
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
         
         log.info("Request GET /api/v1/finance/presupuestos - Usuario: {}", userId);
         
-        List<PresupuestoResponse> presupuestos = presupuestoService.listarPresupuestosPorUsuario(userId);
+        Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100));
+        PageResponse<PresupuestoResponse> presupuestos = presupuestoService.listarPresupuestosPorUsuario(userId, pageable);
         
-        ApiResponse<List<PresupuestoResponse>> apiResponse = ApiResponse.success(
+        ApiResponse<PageResponse<PresupuestoResponse>> apiResponse = ApiResponse.success(
             "Presupuestos listados correctamente", presupuestos);
         
         return ResponseEntity.ok(apiResponse);
@@ -89,16 +96,21 @@ public class PresupuestoController {
     // Recibe el año y mes como parámetros, consulta al service
     // y retorna los presupuestos filtrados desde la base de datos.
     @GetMapping(params = {"anio", "mes"})
-    public ResponseEntity<ApiResponse<List<PresupuestoResponse>>> listarPresupuestosPorPeriodo(
+    public ResponseEntity<ApiResponse<PageResponse<PresupuestoResponse>>> listarPresupuestosPorPeriodo(
             @RequestParam Integer anio,
             @RequestParam Integer mes,
-            @RequestHeader("X-User-Id") UUID userId) {
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
         
         log.info("Request GET /api/v1/finance/presupuestos?anio={}&mes={} - Usuario: {}", anio, mes, userId);
         
-        List<PresupuestoResponse> presupuestos = presupuestoService.listarPresupuestosPorPeriodo(userId, anio, mes);
+        Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100),
+                Sort.by("categoriaId").ascending());
+        PageResponse<PresupuestoResponse> presupuestos =
+                presupuestoService.listarPresupuestosPorPeriodo(userId, anio, mes, pageable);
         
-        ApiResponse<List<PresupuestoResponse>> apiResponse = ApiResponse.success(
+        ApiResponse<PageResponse<PresupuestoResponse>> apiResponse = ApiResponse.success(
             "Presupuestos filtrados por año y mes correctamente", presupuestos);
         
         return ResponseEntity.ok(apiResponse);

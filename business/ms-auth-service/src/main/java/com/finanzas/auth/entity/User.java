@@ -24,41 +24,41 @@ public class User {
 
     @NotBlank(message = "El nombre de usuario es obligatorio")
     @Size(min = 3, max = 50, message = "El nombre de usuario debe tener entre 3 y 50 caracteres")
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, columnDefinition = "TEXT")
     private String username;
 
     @NotBlank(message = "El email es obligatorio")
     @Email(message = "El email debe ser válido")
     @Size(max = 100, message = "El email no puede exceder 100 caracteres")
-    @Column(unique = true, nullable = false)
+    @Column(unique = true, nullable = false, columnDefinition = "TEXT")
     private String email;
 
     @NotBlank(message = "La contraseña es obligatoria")
     @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "VARCHAR(255)")
     private String password;
 
     @NotBlank(message = "El primer nombre es obligatorio")
     @Size(max = 50, message = "El primer nombre no puede exceder 50 caracteres")
-    @Column(name = "primer_nombre", nullable = false)
+    @Column(name = "primer_nombre", nullable = false, columnDefinition = "TEXT")
     private String primerNombre;
 
     @NotBlank(message = "El primer apellido es obligatorio")
     @Size(max = 50, message = "El primer apellido no puede exceder 50 caracteres")
-    @Column(name = "primer_apellido", nullable = false)
+    @Column(name = "primer_apellido", nullable = false, columnDefinition = "TEXT")
     private String primerApellido;
 
     @Size(max = 50, message = "El segundo nombre no puede exceder 50 caracteres")
-    @Column(name = "segundo_nombre")
+    @Column(name = "segundo_nombre", columnDefinition = "TEXT")
     private String segundoNombre;
 
     @Size(max = 50, message = "El segundo apellido no puede exceder 50 caracteres")
-    @Column(name = "segundo_apellido")
+    @Column(name = "segundo_apellido", columnDefinition = "TEXT")
     private String segundoApellido;
 
     @NotBlank(message = "El número de celular es obligatorio")
     @Pattern(regexp = "^[+]?[0-9]{10,15}$", message = "El número de celular no es válido")
-    @Column(name = "celular", unique = true, nullable = false)
+    @Column(name = "celular", unique = true, nullable = false, columnDefinition = "TEXT")
     private String celular;
 
     @Column(name = "email_verificado", nullable = false)

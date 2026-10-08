@@ -2,6 +2,7 @@ package com.finanzas.finance.service;
 
 import com.finanzas.finance.dto.MovimientoRequest;
 import com.finanzas.finance.dto.MovimientoResponse;
+import com.finanzas.finance.dto.PageResponse;
 import com.finanzas.finance.entity.Movimiento;
 import com.finanzas.finance.exception.BusinessException;
 import com.finanzas.finance.repository.MovimientoRepository;
@@ -9,6 +10,7 @@ import com.finanzas.finance.repository.CategoriaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
@@ -76,7 +78,6 @@ public class MovimientoService {
         movimiento.setTipo(Movimiento.TipoMovimiento.valueOf(request.getTipo()));
         movimiento.setValor(request.getValor());
         movimiento.setFecha(request.getFecha());
-        movimiento.setFacturaId(request.getFacturaId());
 
         // Guardar
         Movimiento saved = movimientoRepository.save(movimiento);
@@ -92,14 +93,11 @@ public class MovimientoService {
      * @return Lista de movimientos del usuario
      */
     @Transactional(readOnly = true)
-    public List<MovimientoResponse> listarMovimientosPorUsuario(UUID userId) {
+    public PageResponse<MovimientoResponse> listarMovimientosPorUsuario(UUID userId, Pageable pageable) {
         log.info("Listando movimientos para usuario: {}", userId);
 
-        List<Movimiento> movimientos = movimientoRepository.findByUserId(userId);
-        
-        return movimientos.stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+        return PageResponse.from(
+            movimientoRepository.findByUserIdOrderByFechaDesc(userId, pageable).map(this::mapToResponse));
     }
 
     /**
@@ -156,7 +154,6 @@ public class MovimientoService {
         existente.setTipo(Movimiento.TipoMovimiento.valueOf(request.getTipo()));
         existente.setValor(request.getValor());
         existente.setFecha(request.getFecha());
-        existente.setFacturaId(request.getFacturaId());
 
         Movimiento actualizado = movimientoRepository.save(existente);
         

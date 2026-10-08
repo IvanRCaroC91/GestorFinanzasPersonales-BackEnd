@@ -16,12 +16,11 @@ import java.util.UUID;
  * 
  * Campos obligatorios según la tabla:
  * - categoria_id: FK a categorias.id
- * - descripcion: TEXT NOT NULL  
+ * - descripcion: TEXT NOT NULL
  * - tipo: ENUM tipo_movimiento ('INGRESO', 'EGRESO')
  * - valor: NUMERIC(12,2) NOT NULL CHECK (valor >= 0)
  * - fecha: DATE NOT NULL
- * - factura_id: FK a facturas.id (nullable)
- * 
+ *
  * @author Sistema de Finanzas Personales
  * @version 1.0.0
  */
@@ -43,8 +42,6 @@ public class MovimientoRequest {
 
     @NotNull(message = "La fecha es obligatoria")
     private LocalDate fecha;
-
-    private UUID facturaId; // Opcional
 
     // Constructores
     public MovimientoRequest() {}
@@ -88,13 +85,5 @@ public class MovimientoRequest {
 
     public void setFecha(LocalDate fecha) {
         this.fecha = fecha;
-    }
-
-    public UUID getFacturaId() {
-        return facturaId;
-    }
-
-    public void setFacturaId(UUID facturaId) {
-        this.facturaId = facturaId;
     }
 }

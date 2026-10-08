@@ -15,10 +15,11 @@ import javax.crypto.SecretKey;
 import java.util.UUID;
 
 /**
- * Interceptor para validar el header X-User-Id en todas las peticiones.
- * 
- * Garantiza que todas las solicitudes a los endpoints de la API
- * incluyan un ID de usuario válido en formato UUID.
+ * Interceptor que valida el contrato de identidad entre Gateway y Finance.
+ *
+ * El Gateway elimina cualquier header de identidad enviado por el cliente,
+ * valida el JWT y agrega X-User-Id con el claim userId del token. Finance
+ * vuelve a validar el JWT y exige que ambos valores coincidan.
  * 
  * @author Sistema de Finanzas Personales
  * @version 1.0.0
@@ -64,8 +65,10 @@ public class UserValidationInterceptor implements HandlerInterceptor {
             UUID userId = UUID.fromString(userIdHeader.trim());
             Claims claims = parseToken(authorizationHeader.substring(7));
             String tokenUserId = claims.get("userId", String.class);
+            String tokenUsername = claims.getSubject();
 
-            if (!userId.toString().equals(tokenUserId)) {
+            if (tokenUserId == null || tokenUsername == null || tokenUsername.isBlank()
+                    || !userId.toString().equals(tokenUserId)) {
                 log.warn("El usuario del token no coincide con {}: {} {} - IP: {}",
                         USER_ID_HEADER, method, path, getClientIpAddress(request));
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Identidad de usuario no coincide con el token");
