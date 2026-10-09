@@ -2,6 +2,7 @@ package com.finanzas.finance.service;
 
 import com.finanzas.finance.dto.PresupuestoRequest;
 import com.finanzas.finance.dto.PresupuestoResponse;
+import com.finanzas.finance.dto.PageResponse;
 import com.finanzas.finance.dto.PresupuestoEjecucionResponse;
 import com.finanzas.finance.entity.Presupuesto;
 import com.finanzas.finance.entity.Categoria;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -108,14 +110,12 @@ public class PresupuestoService {
      * @return Lista de presupuestos del usuario
      */
     @Transactional(readOnly = true)
-    public List<PresupuestoResponse> listarPresupuestosPorUsuario(UUID userId) {
+    public PageResponse<PresupuestoResponse> listarPresupuestosPorUsuario(UUID userId, Pageable pageable) {
         log.info("Listando presupuestos para usuario: {}", userId);
         
-        List<Presupuesto> presupuestos = presupuestoRepository.findByUserIdOrderByAnioDescMesDescCategoriaIdAsc(userId);
-        
-        List<PresupuestoResponse> responses = presupuestos.stream()
-            .map(this::mapToResponse)
-            .collect(Collectors.toList());
+        PageResponse<PresupuestoResponse> responses = PageResponse.from(
+            presupuestoRepository.findByUserIdOrderByAnioDescMesDescCategoriaIdAsc(userId, pageable)
+            .map(this::mapToResponse));
             
         log.info("Se encontraron {} presupuestos para usuario: {}", responses.size(), userId);
         return responses;
@@ -130,14 +130,13 @@ public class PresupuestoService {
      * @return Lista de presupuestos filtrados por año y mes
      */
     @Transactional(readOnly = true)
-    public List<PresupuestoResponse> listarPresupuestosPorPeriodo(UUID userId, Integer anio, Integer mes) {
+    public PageResponse<PresupuestoResponse> listarPresupuestosPorPeriodo(
+            UUID userId, Integer anio, Integer mes, Pageable pageable) {
         log.info("Listando presupuestos para usuario: {} - Año: {} - Mes: {}", userId, anio, mes);
         
-        List<Presupuesto> presupuestos = presupuestoRepository.findByUserIdAndAnioAndMesOrderByCategoriaIdAsc(userId, anio, mes);
-        
-        List<PresupuestoResponse> responses = presupuestos.stream()
-            .map(this::mapToResponse)
-            .collect(Collectors.toList());
+        PageResponse<PresupuestoResponse> responses = PageResponse.from(
+            presupuestoRepository.findByUserIdAndAnioAndMesOrderByCategoriaIdAsc(userId, anio, mes, pageable)
+            .map(this::mapToResponse));
             
         log.info("Se encontraron {} presupuestos para usuario: {} - Año: {} - Mes: {}", responses.size(), userId, anio, mes);
         return responses;
@@ -251,7 +250,8 @@ public class PresupuestoService {
         log.info("Obteniendo ejecución de presupuestos - Usuario: {} - Año: {} - Mes: {}", userId, anio, mes);
 
         // Obtener todos los presupuestos del usuario para el año y mes
-        List<Presupuesto> presupuestos = presupuestoRepository.findByUserIdAndAnioAndMesOrderByCategoriaIdAsc(userId, anio, mes);
+        List<Presupuesto> presupuestos = presupuestoRepository.findByUserIdAndAnioAndMesOrderByCategoriaIdAsc(
+                userId, anio, mes, org.springframework.data.domain.Pageable.unpaged()).getContent();
 
         return presupuestos.stream()
             .map(presupuesto -> {

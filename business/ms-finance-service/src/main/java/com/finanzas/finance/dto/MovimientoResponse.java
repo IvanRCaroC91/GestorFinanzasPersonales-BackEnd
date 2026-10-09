@@ -21,8 +21,8 @@ import java.util.UUID;
  * - fecha: DATE
  * - createdAt: TIMESTAMP
  * 
- * Nota: facturaId se excluye intencionalmente por ser opcional
- * y no requerirse en las respuestas estándar.
+ * Nota: campos de facturas no forman parte del MVP actual
+ * y se excluyen de la respuesta estándar.
  * 
  * @author Sistema de Finanzas Personales
  * @version 1.0.0

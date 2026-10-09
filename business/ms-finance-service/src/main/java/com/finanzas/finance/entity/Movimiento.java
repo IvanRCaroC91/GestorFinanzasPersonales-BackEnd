@@ -12,8 +12,7 @@ import java.util.UUID;
  * Mapea directamente la estructura de la tabla movimientos existente:
  * - id: UUID primary key
  * - user_id: FK a usuarios.id
- * - categoria_id: FK a categorias.id  
- * - factura_id: FK a facturas.id (nullable)
+ * - categoria_id: FK a categorias.id
  * - descripcion: TEXT
  * - tipo: ENUM tipo_movimiento ('INGRESO', 'EGRESO')
  * - valor: NUMERIC(12,2)
@@ -38,9 +37,6 @@ public class Movimiento {
     @Column(name = "categoria_id", nullable = false, columnDefinition = "UUID")
     private UUID categoriaId;
 
-    @Column(name = "factura_id", columnDefinition = "UUID")
-    private UUID facturaId;
-
     @Column(name = "descripcion", nullable = false, columnDefinition = "TEXT")
     private String descripcion;
 
@@ -49,7 +45,7 @@ public class Movimiento {
      * Valores: 'INGRESO', 'EGRESO'
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo", nullable = false, columnDefinition = "tipo_movimiento")
+    @Column(name = "tipo", nullable = false, length = 20)
     private TipoMovimiento tipo;
 
     @Column(name = "valor", nullable = false, precision = 12, scale = 2)
@@ -95,14 +91,6 @@ public class Movimiento {
 
     public void setCategoriaId(UUID categoriaId) {
         this.categoriaId = categoriaId;
-    }
-
-    public UUID getFacturaId() {
-        return facturaId;
-    }
-
-    public void setFacturaId(UUID facturaId) {
-        this.facturaId = facturaId;
     }
 
     public String getDescripcion() {

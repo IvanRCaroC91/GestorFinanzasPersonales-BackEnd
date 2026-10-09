@@ -11,11 +11,10 @@ spring:
       server:
         native:
           search-locations: ${CONFIG_SERVER_NATIVE_SEARCH_LOCATIONS:file:/app/config/config}
-  # Configuración de seguridad básica (opcional, se puede agregar Spring Security después)
   security:
     user:
-      name: ${CONFIG_SERVER_USER}
-      password: ${CONFIG_SERVER_PASSWORD}
+      name: ${CONFIG_SERVER_USER:admin}
+      password: ${CONFIG_SERVER_PASSWORD:admin123}
 
 # Eureka Client Configuration
 eureka:

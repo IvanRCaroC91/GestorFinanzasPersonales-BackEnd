@@ -2,6 +2,7 @@ package com.finanzas.finance.service;
 
 import com.finanzas.finance.dto.CategoriaRequest;
 import com.finanzas.finance.dto.CategoriaResponse;
+import com.finanzas.finance.dto.PageResponse;
 import com.finanzas.finance.entity.Categoria;
 import com.finanzas.finance.exception.ResourceNotFoundException;
 import com.finanzas.finance.exception.BusinessException;
@@ -10,6 +11,7 @@ import com.finanzas.finance.repository.MovimientoRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
@@ -99,14 +101,11 @@ public class CategoriaService {
      * @return Lista de categorías del usuario
      */
     @Transactional(readOnly = true)
-    public List<CategoriaResponse> listarCategoriasPorUsuario(UUID userId) {
+    public PageResponse<CategoriaResponse> listarCategoriasPorUsuario(UUID userId, Pageable pageable) {
         log.info("Listando categorías para usuario: {}", userId);
         
-        List<Categoria> categorias = categoriaRepository.findByUserIdOrderByNombreAsc(userId);
-        
-        List<CategoriaResponse> responses = categorias.stream()
-            .map(this::mapToResponse)
-            .collect(Collectors.toList());
+        PageResponse<CategoriaResponse> responses = PageResponse.from(
+            categoriaRepository.findByUserIdOrderByNombreAsc(userId, pageable).map(this::mapToResponse));
             
         log.info("Se encontraron {} categorías para usuario: {}", responses.size(), userId);
         return responses;
@@ -121,16 +120,14 @@ public class CategoriaService {
      * @throws BusinessException si el tipo es inválido
      */
     @Transactional(readOnly = true)
-    public List<CategoriaResponse> listarCategoriasPorTipo(UUID userId, String tipo) {
+    public PageResponse<CategoriaResponse> listarCategoriasPorTipo(UUID userId, String tipo, Pageable pageable) {
         log.info("Listando categorías por tipo: {} para usuario: {}", tipo, userId);
         
         try {
             Categoria.TipoMovimiento tipoEnum = Categoria.TipoMovimiento.valueOf(tipo);
-            List<Categoria> categorias = categoriaRepository.findByUserIdAndTipoOrderByNombreAsc(userId, tipoEnum);
-            
-            List<CategoriaResponse> responses = categorias.stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
+            PageResponse<CategoriaResponse> responses = PageResponse.from(
+                categoriaRepository.findByUserIdAndTipoOrderByNombreAsc(userId, tipoEnum, pageable)
+                    .map(this::mapToResponse));
                 
             log.info("Se encontraron {} categorías de tipo {} para usuario: {}", 
                     responses.size(), tipo, userId);

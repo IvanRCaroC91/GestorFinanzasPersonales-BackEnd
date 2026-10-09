@@ -3,12 +3,16 @@ package com.finanzas.finance.controller;
 import com.finanzas.finance.dto.ApiResponse;
 import com.finanzas.finance.dto.CategoriaRequest;
 import com.finanzas.finance.dto.CategoriaResponse;
+import com.finanzas.finance.dto.PageResponse;
 import com.finanzas.finance.service.CategoriaService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -82,14 +86,18 @@ public class CategoriaController {
      * @return Lista de categorías del usuario
      */
     @GetMapping
-    public ResponseEntity<ApiResponse<List<CategoriaResponse>>> listarCategorias(
-            @RequestHeader("X-User-Id") UUID userId) {
+    public ResponseEntity<ApiResponse<PageResponse<CategoriaResponse>>> listarCategorias(
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
         
         log.info("Request GET /api/v1/finance/categorias - Usuario: {}", userId);
         
-        List<CategoriaResponse> categorias = categoriaService.listarCategoriasPorUsuario(userId);
+        Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100),
+                Sort.by("nombre").ascending());
+        PageResponse<CategoriaResponse> categorias = categoriaService.listarCategoriasPorUsuario(userId, pageable);
         
-        ApiResponse<List<CategoriaResponse>> apiResponse = ApiResponse.success(
+        ApiResponse<PageResponse<CategoriaResponse>> apiResponse = ApiResponse.success(
             "Categorías listadas correctamente", categorias);
         
         return ResponseEntity.ok(apiResponse);
@@ -102,15 +110,19 @@ public class CategoriaController {
     // Recibe el tipo como parámetro, consulta al service
     // y retorna las categorías filtradas desde la base de datos.
     @GetMapping(params = "tipo")
-    public ResponseEntity<ApiResponse<List<CategoriaResponse>>> listarCategoriasPorTipo(
+    public ResponseEntity<ApiResponse<PageResponse<CategoriaResponse>>> listarCategoriasPorTipo(
             @RequestParam String tipo,
-            @RequestHeader("X-User-Id") UUID userId) {
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
         
         log.info("Request GET /api/v1/finance/categorias?tipo={} - Usuario: {}", tipo, userId);
         
-        List<CategoriaResponse> categorias = categoriaService.listarCategoriasPorTipo(userId, tipo);
+        Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100),
+                Sort.by("nombre").ascending());
+        PageResponse<CategoriaResponse> categorias = categoriaService.listarCategoriasPorTipo(userId, tipo, pageable);
         
-        ApiResponse<List<CategoriaResponse>> apiResponse = ApiResponse.success(
+        ApiResponse<PageResponse<CategoriaResponse>> apiResponse = ApiResponse.success(
             "Categorías filtradas por tipo correctamente", categorias);
         
         return ResponseEntity.ok(apiResponse);

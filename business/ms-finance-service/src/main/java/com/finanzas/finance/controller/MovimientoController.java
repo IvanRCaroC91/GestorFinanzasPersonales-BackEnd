@@ -3,6 +3,7 @@ package com.finanzas.finance.controller;
 import com.finanzas.finance.dto.ApiResponse;
 import com.finanzas.finance.dto.MovimientoRequest;
 import com.finanzas.finance.dto.MovimientoResponse;
+import com.finanzas.finance.dto.PageResponse;
 import com.finanzas.finance.entity.Movimiento;
 import com.finanzas.finance.service.MovimientoService;
 import com.finanzas.finance.repository.MovimientoRepository;
@@ -11,6 +12,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,13 +23,13 @@ import java.util.stream.Collectors;
 
 /**
  * Controller REST para gestión de movimientos financieros.
- * 
+ *
  * Expone endpoints para operaciones CRUD sobre movimientos,
  * manteniendo separación de responsabilidades y delegando
  * toda la lógica de negocio al Service correspondiente.
- * 
+ *
  * Base path: /api/v1/finance/movimientos
- * 
+ *
  * @author Sistema de Finanzas Personales
  * @version 1.0.0
  */
@@ -53,14 +57,14 @@ public class MovimientoController {
     public ResponseEntity<ApiResponse<MovimientoResponse>> crearMovimiento(
             @Valid @RequestBody MovimientoRequest request,
             @RequestHeader("X-User-Id") UUID userId) {
-        
+
         log.info("Request POST /api/v1/finance/movimientos - Usuario: {}", userId);
-        
+
         MovimientoResponse response = movimientoService.crearMovimiento(request, userId);
-        
+
         ApiResponse<MovimientoResponse> apiResponse = ApiResponse.success(
             "Movimiento creado correctamente", response);
-        
+
         return new ResponseEntity<>(apiResponse, HttpStatus.CREATED);
     }
 
@@ -71,16 +75,20 @@ public class MovimientoController {
     // Recibe el ID del usuario desde el header, consulta al service
     // y retorna la lista de movimientos desde la base de datos.
     @GetMapping
-    public ResponseEntity<ApiResponse<List<MovimientoResponse>>> listarMovimientos(
-            @RequestHeader("X-User-Id") UUID userId) {
-        
+    public ResponseEntity<ApiResponse<PageResponse<MovimientoResponse>>> listarMovimientos(
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
         log.info("Request GET /api/v1/finance/movimientos - Usuario: {}", userId);
-        
-        List<MovimientoResponse> movimientos = movimientoService.listarMovimientosPorUsuario(userId);
-        
-        ApiResponse<List<MovimientoResponse>> apiResponse = ApiResponse.success(
+
+        Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100),
+                Sort.by("fecha").descending().and(Sort.by("createdAt").descending()));
+        PageResponse<MovimientoResponse> movimientos = movimientoService.listarMovimientosPorUsuario(userId, pageable);
+
+        ApiResponse<PageResponse<MovimientoResponse>> apiResponse = ApiResponse.success(
             "Movimientos listados correctamente", movimientos);
-        
+
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -91,29 +99,26 @@ public class MovimientoController {
     // Recibe el tipo como parámetro, consulta al repository
     // y retorna los movimientos filtrados desde la base de datos.
     @GetMapping(params = "tipo")
-    public ResponseEntity<ApiResponse<List<MovimientoResponse>>> listarMovimientosPorTipo(
+    public ResponseEntity<ApiResponse<PageResponse<MovimientoResponse>>> listarMovimientosPorTipo(
             @RequestParam String tipo,
-            @RequestHeader("X-User-Id") UUID userId) {
-        
+            @RequestHeader("X-User-Id") UUID userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+
         log.info("Request GET /api/v1/finance/movimientos?tipo={} - Usuario: {}", tipo, userId);
-        
-        List<MovimientoResponse> movimientos = movimientoRepository.findByUserIdAndTipo(
-                userId, Movimiento.TipoMovimiento.valueOf(tipo))
-                .stream()
-                .map(m -> new MovimientoResponse(
-                        m.getId(),
-                        m.getCategoriaId(),
-                        m.getDescripcion(),
-                        m.getTipo().name(),
-                        m.getValor(),
-                        m.getFecha(),
-                        m.getCreatedAt()
-                ))
-                .collect(Collectors.toList());
-        
-        ApiResponse<List<MovimientoResponse>> apiResponse = ApiResponse.success(
+
+        Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100),
+                Sort.by("fecha").descending().and(Sort.by("createdAt").descending()));
+        PageResponse<MovimientoResponse> movimientos = PageResponse.from(
+                movimientoRepository.findByUserIdAndTipoOrderByFechaDesc(
+                        userId, Movimiento.TipoMovimiento.valueOf(tipo), pageable)
+                    .map(m -> new MovimientoResponse(
+                            m.getId(), m.getCategoriaId(), m.getDescripcion(), m.getTipo().name(),
+                            m.getValor(), m.getFecha(), m.getCreatedAt())));
+
+        ApiResponse<PageResponse<MovimientoResponse>> apiResponse = ApiResponse.success(
             "Movimientos filtrados por tipo correctamente", movimientos);
-        
+
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -128,14 +133,14 @@ public class MovimientoController {
             @PathVariable UUID id,
             @Valid @RequestBody MovimientoRequest request,
             @RequestHeader("X-User-Id") UUID userId) {
-        
+
         log.info("Request PUT /api/v1/finance/movimientos/{} - Usuario: {}", id, userId);
-        
+
         MovimientoResponse response = movimientoService.actualizarMovimiento(id, request, userId);
-        
+
         ApiResponse<MovimientoResponse> apiResponse = ApiResponse.success(
             "Movimiento actualizado correctamente", response);
-        
+
         return ResponseEntity.ok(apiResponse);
     }
 
@@ -149,13 +154,13 @@ public class MovimientoController {
     public ResponseEntity<ApiResponse<Void>> eliminarMovimiento(
             @PathVariable UUID id,
             @RequestHeader("X-User-Id") UUID userId) {
-        
+
         log.info("Request DELETE /api/v1/finance/movimientos/{} - Usuario: {}", id, userId);
-        
+
         movimientoService.eliminarMovimiento(id, userId);
-        
+
         ApiResponse<Void> apiResponse = ApiResponse.success("Movimiento eliminado correctamente");
-        
+
         return ResponseEntity.ok(apiResponse);
     }
 }

@@ -2,6 +2,8 @@ package com.finanzas.finance.repository;
 
 import com.finanzas.finance.entity.Presupuesto;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -46,7 +48,7 @@ public interface PresupuestoRepository extends JpaRepository<Presupuesto, UUID> 
     /**
      * Busca presupuestos de un usuario por año y mes ordenados por categoría.
      */
-    List<Presupuesto> findByUserIdAndAnioAndMesOrderByCategoriaIdAsc(UUID userId, Integer anio, Integer mes);
+    Page<Presupuesto> findByUserIdAndAnioAndMesOrderByCategoriaIdAsc(UUID userId, Integer anio, Integer mes, Pageable pageable);
 
     /**
      * Busca presupuestos de un usuario por categoría, año y mes.
@@ -75,7 +77,7 @@ public interface PresupuestoRepository extends JpaRepository<Presupuesto, UUID> 
     /**
      * Lista presupuestos de un usuario ordenados por año descendente, mes descendente y categoría.
      */
-    List<Presupuesto> findByUserIdOrderByAnioDescMesDescCategoriaIdAsc(UUID userId);
+    Page<Presupuesto> findByUserIdOrderByAnioDescMesDescCategoriaIdAsc(UUID userId, Pageable pageable);
 
     /**
      * Verifica si existe un presupuesto para el mismo usuario, categoría, año y mes, excluyendo un ID específico.

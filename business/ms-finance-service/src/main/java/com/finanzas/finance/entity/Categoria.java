@@ -46,7 +46,7 @@ public class Categoria {
      * Valores: 'INGRESO', 'EGRESO'
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo", nullable = false, columnDefinition = "tipo_movimiento")
+    @Column(name = "tipo", nullable = false, length = 20)
     private TipoMovimiento tipo;
 
     /**
@@ -56,7 +56,7 @@ public class Categoria {
      * Default: 'NECESARIO'
      */
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo_gasto", nullable = false, columnDefinition = "tipo_gasto")
+    @Column(name = "tipo_gasto", nullable = false, length = 20)
     private TipoGasto tipoGasto = TipoGasto.NECESARIO;
 
     /**
